@@ -6,7 +6,7 @@ dotenv.config();
 
 const app = express();
 
-// Middleware para parsear solicitudes JSON
+
 app.use(express.json());
 
 

@@ -16,6 +16,6 @@ app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 app.get('/', (req, res) => {
-    res.send('¡Hola, mundo!');
+    res.send('¡Hola, Tech Moms 2.0!');
   });
   

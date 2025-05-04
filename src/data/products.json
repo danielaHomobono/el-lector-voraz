@@ -1,0 +1,31 @@
+[
+  {
+    "id": "1",
+    "type": "book",
+    "title": "Lolita",
+    "author": "Gabriel García Márquez",
+    "isbn": "978-3-16-148410-0",
+    "price": 16000,
+    "stock": 5,
+    "category": "Novela"
+  },
+  {
+    "id": "2",
+    "type": "cafe",
+    "name": "Café Americano",
+    "price": 500,
+    "stock": 100,
+    "category": "Bebidas"
+  },
+  {
+    "id": "d88154a7-bc71-4e9e-bf97-ee617d1a3ce2",
+    "type": "book",
+    "title": "Aquí hay dragones",
+    "author": "Florencia Bonelli",
+    "isbn": "978-3-16-148410-0",
+    "name": null,
+    "price": 16000,
+    "stock": 8,
+    "category": "Novela"
+  }
+]

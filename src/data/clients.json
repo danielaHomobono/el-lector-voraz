@@ -16,5 +16,23 @@
     "name": "Juana Pery",
     "points": 10,
     "email": "juanap@gmail.com"
+  },
+  {
+    "id": "8cdb8256-991d-4790-82cd-d336c64fc764",
+    "name": "Roma Zagordo",
+    "email": "romizagordo@gmail.com",
+    "points": 0
+  },
+  {
+    "id": "0880c8ee-d1b6-4cd0-86dd-1b032c1535c1",
+    "name": "Dani Homobono",
+    "email": "dani@gmail.com",
+    "points": 0
+  },
+  {
+    "id": "e371e5b0-906b-419b-9e5a-8432d3dd90d9",
+    "name": "Vero Hassen",
+    "email": "vero@gmail.com",
+    "points": 0
   }
 ]

@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 // Middleware para manejar errores generales (500)
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Error interno del servidor' });
+  res.status(500).json({ error: 'Error interno en el  del servidor' });
 });
 
 // Iniciar el servidor en el puerto definido en .env o 3000 por defecto

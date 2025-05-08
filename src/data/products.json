@@ -6,7 +6,7 @@
     "author": "Gabriel García Márquez",
     "isbn": "978-3-16-148410-0",
     "price": 16000,
-    "stock": 5,
+    "stock": 4,
     "category": "Novela"
   },
   {
@@ -27,5 +27,16 @@
     "price": 16000,
     "stock": 8,
     "category": "Novela"
+  },
+  {
+    "id": "4f6eee28-83b6-4f94-b5f8-cb15983a5537",
+    "type": "book",
+    "title": "El Principito",
+    "author": "Antoine de Saint-Exupéry",
+    "isbn": "1234567890",
+    "name": null,
+    "price": 100,
+    "stock": 10,
+    "category": "Ficción"
   }
 ]

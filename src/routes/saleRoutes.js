@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Crear una venta
+// Crear una venta con TODAS las validaciones ya hechas en el service
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const sale = await SaleService.createSale(req.body);

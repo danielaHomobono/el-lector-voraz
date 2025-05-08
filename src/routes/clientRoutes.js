@@ -24,9 +24,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Crear un cliente
+// Crear un cliente con validación de campos
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    const { name, email, points } = req.body;
+
+    if (!name || !email || typeof points !== 'number') {
+      return res.status(400).json({
+        error: 'Faltan campos requeridos: name, email y points son obligatorios',
+      });
+    }
+
     const client = await ClientService.createClient(req.body);
     res.status(201).json(client);
   } catch (error) {
@@ -34,11 +42,22 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Actualizar un cliente
+// Actualizar un cliente con validación
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
-    const client = await ClientService.updateClient(req.params.id, req.body);
-    res.json(client);
+    const { name, email, points } = req.body;
+
+    if (!name || !email || typeof points !== 'number') {
+      return res.status(400).json({ error: 'Faltan campos requeridos o tipos inválidos' });
+    }
+
+    const existingClient = await ClientService.getClientById(req.params.id);
+    if (!existingClient) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    const updatedClient = await ClientService.updateClient(req.params.id, req.body);
+    res.json(updatedClient);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

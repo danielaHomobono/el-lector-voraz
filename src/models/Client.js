@@ -1,16 +1,22 @@
+
 const { v4: uuidv4 } = require('uuid');
 
 class Client {
-  constructor(name, email) {
-    this.id = uuidv4();
+  constructor({ id, name, email, points = 0 }) {
+    if (!name || !email) throw new Error('Faltan campos requeridos');
+    this.id = id;
     this.name = name;
     this.email = email;
-    this.points = 0;
+    this.points = points;
   }
 
-  // Agrega puntos al cliente
-  addPoints(amount) {
-    this.points += amount;
+  addPoints(points) {
+    this.points += points;
+  }
+
+  redeemPoints(points) {
+    if (this.points < points) throw new Error('Puntos insuficientes');
+    this.points -= points;
   }
 }
 

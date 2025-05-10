@@ -1,12 +1,12 @@
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fileService = require('./fileService');
-const Product = require('../models/Product');
+const CafeProduct = require('../models/CafeProduct');
 
-const PRODUCTS_FILE = path.resolve(__dirname, '..', 'data', 'products.json');
+const CAFE_FILE = path.resolve(__dirname, '..', 'data', 'cafe_products.json');
 
 async function getAllProducts() {
-  return await fileService.readFile(PRODUCTS_FILE);
+  return await fileService.readFile(CAFE_FILE);
 }
 
 async function getProductById(id) {
@@ -16,9 +16,9 @@ async function getProductById(id) {
 
 async function createProduct(data) {
   const products = await getAllProducts();
-  const product = new Product({ id: uuidv4(), ...data });
+  const product = new CafeProduct({ id: uuidv4(), ...data });
   products.push(product);
-  await fileService.writeFile(PRODUCTS_FILE, products);
+  await fileService.writeFile(CAFE_FILE, products);
   return product;
 }
 
@@ -27,7 +27,7 @@ async function updateProduct(id, data) {
   const index = products.findIndex(p => p.id === id);
   if (index === -1) throw new Error('Producto no encontrado');
   products[index] = { ...products[index], ...data };
-  await fileService.writeFile(PRODUCTS_FILE, products);
+  await fileService.writeFile(CAFE_FILE, products);
   return products[index];
 }
 
@@ -35,7 +35,7 @@ async function deleteProduct(id) {
   const products = await getAllProducts();
   const filtered = products.filter(p => p.id !== id);
   if (filtered.length === products.length) throw new Error('Producto no encontrado');
-  await fileService.writeFile(PRODUCTS_FILE, filtered);
+  await fileService.writeFile(CAFE_FILE, filtered);
 }
 
 module.exports = { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct };

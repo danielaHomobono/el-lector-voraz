@@ -3,8 +3,7 @@ const router = express.Router();
 const SaleService = require('../services/saleService');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Obtener todas las ventas
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const sales = await SaleService.getAllSales();
     res.json(sales);
@@ -13,9 +12,17 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Crear una venta con TODAS las validaciones ya hechas en el service
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    const { items, channel, clientId, redeemPoints } = req.body;
+    if (!items || !items.length || !channel) {
+      return res.status(400).json({ error: 'Faltan campos requeridos' });
+    }
+    for (const item of items) {
+      if (!item.productId || !item.type || !item.quantity || item.quantity < 1) {
+        return res.status(400).json({ error: 'Ítems inválidos' });
+      }
+    }
     const sale = await SaleService.createSale(req.body);
     res.status(201).json(sale);
   } catch (error) {

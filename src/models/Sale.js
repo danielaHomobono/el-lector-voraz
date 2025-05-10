@@ -1,13 +1,14 @@
 const { v4: uuidv4 } = require('uuid');
 
 class Sale {
-  constructor(productId, clientId, quantity, total) {
-    this.id = uuidv4();
-    this.productId = productId;
+  constructor({ id, clientId, items, total, date, channel }) {
+    if (!items || !total || !date || !channel) throw new Error('Faltan campos requeridos');
+    this.id = id;
     this.clientId = clientId;
-    this.quantity = quantity;
+    this.items = items;
     this.total = total;
-    this.date = new Date().toISOString();
+    this.date = date;
+    this.channel = channel;
   }
 }
 

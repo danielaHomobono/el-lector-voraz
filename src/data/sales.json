@@ -11,5 +11,23 @@
     "total": 6000,
     "date": "2025-05-10T14:24:07.727Z",
     "channel": "physical"
+  },
+  {
+    "id": "d62c9a89-1def-4432-a33b-6e98dc65c5cb",
+    "items": [
+      {
+        "productId": "1",
+        "type": "book",
+        "quantity": 1
+      },
+      {
+        "productId": "e5a7438f-0897-4985-985c-b08396aed4bc",
+        "type": "cafe",
+        "quantity": 2
+      }
+    ],
+    "total": 22000,
+    "date": "2025-05-16T22:58:04.685Z",
+    "channel": "online"
   }
 ]

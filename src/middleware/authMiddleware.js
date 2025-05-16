@@ -1,12 +1,21 @@
-const dotenv = require('dotenv');
-dotenv.config();
+const API_KEY = 'secret-key-123';
 
-function authMiddleware(req, res, next) {
+function verifyApiKey(req, res, next) {
   const apiKey = req.headers['x-api-key'];
-  if (!apiKey || apiKey !== process.env.API_KEY) {
+  if (!apiKey || apiKey !== API_KEY) {
     return res.status(401).json({ error: 'Clave API inválida' });
   }
   next();
 }
 
-module.exports = authMiddleware;
+function restrictToAdmin(req, res, next) {
+  console.log('restrictToAdmin: req.user =', req.user);
+  const user = req.user;
+  if (!user || user.role !== 'admin') {
+    console.log('Acceso denegado: user =', user);
+    return res.status(403).json({ error: 'Acceso denegado: se requiere rol de administrador' });
+  }
+  next();
+}
+
+module.exports = { verifyApiKey, restrictToAdmin };

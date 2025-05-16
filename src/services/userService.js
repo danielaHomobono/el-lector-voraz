@@ -11,7 +11,7 @@ async function loginUser({ email, password }) {
   if (!user) {
     throw new Error('Credenciales inválidas');
   }
-  return { id: user.id, email: user.email };
+  return { id: user.id, email: user.email, role: user.role };
 }
 
 module.exports = { loginUser };

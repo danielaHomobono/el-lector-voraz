@@ -2,12 +2,13 @@
   {
     "id": "1",
     "type": "book",
-    "title": "Lolita",
-    "author": "Gabriel García Márquez",
+    "title": "Lolita (Edición Especial)",
+    "author": "Vladimir Nabokov",
     "isbn": "978-3-16-148410-0",
-    "price": 16000,
-    "stock": 4,
-    "category": "Novela"
+    "price": 20000,
+    "stock": 5,
+    "category": "Novela",
+    "consignment": false
   },
   {
     "id": "d88154a7-bc71-4e9e-bf97-ee617d1a3ce2",

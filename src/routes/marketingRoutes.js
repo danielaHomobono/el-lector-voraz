@@ -1,24 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const MarketingService = require('../services/marketingService');
+const marketingService = require('../services/marketingService');
 const authMiddleware = require('../middleware/authMiddleware');
 
-router.get('/posts', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const posts = await MarketingService.getAllPosts();
+    const posts = await marketingService.getAllPosts();
     res.json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.post('/posts', authMiddleware, async (req, res) => {
+router.post('/posts', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {
   try {
-    const { platform, content } = req.body;
-    if (!platform || !content) {
-      return res.status(400).json({ error: 'Faltan campos requeridos' });
-    }
-    const post = await MarketingService.createPost(req.body);
+    const post = await marketingService.createPost(req.body);
     res.status(201).json(post);
   } catch (error) {
     res.status(400).json({ error: error.message });

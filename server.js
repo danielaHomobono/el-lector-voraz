@@ -20,6 +20,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(express.static('public'));
+
 
 // Configurar sesión
 app.use(session({
@@ -37,6 +39,13 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Middleware para pasar el usuario a todas las vistas Pug
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  next();
+});
+
 
 // Configurar Pug
 app.set('view engine', 'pug');
@@ -73,7 +82,7 @@ app.get('/catalogo', async (req, res) => {
 
 // Inicio
 app.get('/', (req, res) => {
-  res.send('¡Hola, Tech Moms 2.0!');
+  res.render('index');
 });
 
 // Manejo de errores

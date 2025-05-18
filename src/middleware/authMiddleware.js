@@ -1,6 +1,11 @@
 const API_KEY = 'secret-key-123';
 
 function verifyApiKey(req, res, next) {
+  // En desarrollo, permitir acceso sin API key
+  if (process.env.NODE_ENV !== 'production') {
+    return next();
+  }
+  
   const apiKey = req.headers['x-api-key'];
   if (!apiKey || apiKey !== API_KEY) {
     return res.status(401).json({ error: 'Clave API inválida' });

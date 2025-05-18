@@ -1,0 +1,57 @@
+extends layout
+
+block content
+  .login-container
+    h1 Iniciar sesión
+
+    if error
+      .error-message= error
+
+    form#loginForm(action="/api/auth/login" method="POST")
+      .form-group
+        label(for="email") Email:
+        input#email(type="email" name="email" required)
+      
+      .form-group
+        label(for="password") Contraseña:
+        input#password(type="password" name="password" required)
+      
+      button(type="submit") Iniciar sesión
+
+    script.
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        };
+
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Login exitoso, redirigir al inicio
+            window.location.href = '/';
+          } else {
+            // Mostrar error
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = data.error;
+            document.querySelector('.login-container').insertBefore(
+              errorDiv,
+              document.getElementById('loginForm')
+            );
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });

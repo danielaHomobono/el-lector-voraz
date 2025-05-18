@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1 Historial de Ventas
+  ul
+    each sale in sales
+      li
+        p Producto ID: #{sale.productId}
+        p Cliente ID: #{sale.clientId}
+        p Cantidad: #{sale.quantity}
+        p Total: $#{sale.total}
+        hr

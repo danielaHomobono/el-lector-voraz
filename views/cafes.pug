@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1 Lista de Cafés
+  ul
+    each cafe in cafes
+      li
+        h2= cafe.name
+        p Precio: $#{cafe.price}
+        p Stock: #{cafe.stock}
+        p Categoría: #{cafe.category}
+        hr

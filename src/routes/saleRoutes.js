@@ -1,25 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const SaleService = require('../services/saleService');
+const saleService = require('../services/saleService');
 const authMiddleware = require('../middleware/authMiddleware');
+const validateSale = require('../middleware/validateSale');
 
-// Obtener todas las ventas
-router.get('/', async (req, res) => {
+router.post('/', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, validateSale, async (req, res) => {
   try {
-    const sales = await SaleService.getAllSales();
-    res.json(sales);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Crear una venta con TODAS las validaciones ya hechas en el service
-router.post('/', authMiddleware, async (req, res) => {
-  try {
-    const sale = await SaleService.createSale(req.body);
+    const sale = await saleService.createSale(req.body);
     res.status(201).json(sale);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/', authMiddleware.restrictToAdmin, async (req, res) => {
+  try {
+    const sales = await saleService.getAllSales();
+    res.json(sales);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

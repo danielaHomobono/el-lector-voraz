@@ -1,48 +1,72 @@
-const FileService = require('./fileService'); 
-const Sale = require('../models/Sale');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fileService = require('./fileService');
 const ProductService = require('./productService');
+const CafeService = require('./cafeService');
 const ClientService = require('./clientService');
+const Sale = require('../models/Sale');
 
-class SaleService {
-  static async getAllSales() {
-    return await FileService.readFile('sales.json');
+const SALES_FILE = path.resolve(__dirname, '..', 'data', 'sales.json');
+const CLIENTS_FILE = path.resolve(__dirname, '..', 'data', 'clients.json');
+
+async function createSale(data) {
+  const sales = await fileService.readFile(SALES_FILE);
+  const products = await ProductService.getAllProducts();
+  const cafeProducts = await CafeService.getAllProducts();
+  const clients = await ClientService.getAllClients();
+  const client = data.clientId ? clients.find(c => c.id === data.clientId) : null;
+
+  let total = 0;
+
+  for (const item of data.items) {
+    let product;
+    if (item.type === 'cafe') {
+      product = cafeProducts.find(p => p.id === item.productId);
+    } else {
+      product = products.find(p => p.id === item.productId);
+    }
+    if (!product) throw new Error(`Producto ${item.productId} no encontrado`);
+    if (product.stock < item.quantity) throw new Error(`Stock insuficiente para ${product.title || product.name}`);
+    product.stock -= item.quantity;
+    total += product.price * item.quantity;
   }
 
-  static async createSale(data) {
-    const sales = await this.getAllSales();
-
-    // Validar producto
-    const product = await ProductService.getProductById(data.productId);
-    if (!product) throw new Error('Producto no encontrado');
-    if (product.stock < data.quantity) throw new Error('Stock insuficiente');
-
-    // Validar cliente (NUEVO)
-    const client = await ClientService.getClientById(data.clientId);
-    if (!client) throw new Error('Cliente no encontrado');
-
-    // Validar cantidad positiva
-    if (data.quantity <= 0) throw new Error('Cantidad inválida');
-
-    // Calcular total
-    const total = product.price * data.quantity;
-
-    // Crear venta
-    const newSale = new Sale(data.productId, data.clientId, data.quantity, total);
-    sales.push(newSale);
-
-    // Actualizar stock
-    product.stock -= data.quantity;
-    await ProductService.updateProduct(product.id, product);
-
-    // Agregar puntos
-    client.points += Math.floor(total / 1000);
-    await ClientService.updateClient(client.id, client);
-
-    // Guardar ventas
-    await FileService.writeFile('sales.json', sales);
-
-    return newSale;
+  // Redimir puntos si corresponde
+  if (data.redeemPoints && client) {
+    if (data.redeemPoints % 10 !== 0) throw new Error('Los puntos deben ser múltiplos de 10');
+    if (client.points < data.redeemPoints) throw new Error('Puntos insuficientes');
+    client.points -= data.redeemPoints;
+    total -= (data.redeemPoints / 10) * 1000;
   }
+
+  // Acreditar puntos si no redimió
+  if (client && !data.redeemPoints) {
+    const points = Math.floor(total / 1000);
+    client.points += points;
+  }
+
+  const sale = new Sale({
+    id: uuidv4(),
+    clientId: data.clientId,
+    items: data.items,
+    total,
+    date: new Date(),
+    channel: data.channel || 'physical'
+  });
+
+  sales.push(sale);
+
+  // Guardar todos los cambios
+  await fileService.writeFile(SALES_FILE, sales);
+  await fileService.writeFile(path.resolve(__dirname, '..', 'data', 'products.json'), products);
+  await fileService.writeFile(path.resolve(__dirname, '..', 'data', 'cafe_products.json'), cafeProducts);
+  await fileService.writeFile(CLIENTS_FILE, clients);
+
+  return sale;
 }
 
-module.exports = SaleService;
+async function getAllSales() {
+  return await fileService.readFile(SALES_FILE);
+}
+
+module.exports = { createSale, getAllSales };

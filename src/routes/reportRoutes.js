@@ -1,13 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const ReportService = require('../services/reportService');
+const reportService = require('../services/reportService');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Obtener reporte de ventas
-router.get('/sales', authMiddleware, async (req, res) => {
+router.get('/inventory', authMiddleware.restrictToAdmin, async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
-    const report = await ReportService.getSalesReport(startDate, endDate);
+    const report = await reportService.getInventoryReport();
+    res.json(report);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/financial', authMiddleware.restrictToAdmin, async (req, res) => {
+  try {
+    const report = await reportService.getFinancialReport();
     res.json(report);
   } catch (error) {
     res.status(500).json({ error: error.message });

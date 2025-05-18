@@ -1,15 +1,42 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const path = require('path');
+const session = require('express-session');
+
 const ProductService = require('./src/services/productService');
+const authRoutes = require('./src/routes/authRoutes');
+const productRoutes = require('./src/routes/productRoutes');
+const cafeRoutes = require('./src/routes/cafeRoutes');
+const saleRoutes = require('./src/routes/saleRoutes');
+const clientRoutes = require('./src/routes/clientRoutes');
+const marketingRoutes = require('./src/routes/marketingRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
+const webRoutes = require('./src/routes/webRoutes');
 
 // Cargar variables de entorno desde .env
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware para parsear solicitudes JSON
 app.use(express.json());
+
+// Configurar sesión
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 horas
+}));
+
+// Middleware global para asignar req.user desde req.session.user
+app.use((req, res, next) => {
+  console.log('Middleware global: req.session.user =', req.session.user);
+  if (req.session.user) {
+    req.user = req.session.user;
+  }
+  next();
+});
 
 // Configurar Pug
 app.set('view engine', 'pug');
@@ -19,16 +46,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
 // Rutas API
-const productRoutes = require('./src/routes/productRoutes');
-const saleRoutes = require('./src/routes/saleRoutes');
-const clientRoutes = require('./src/routes/clientRoutes');
-const reportRoutes = require('./src/routes/reportRoutes');
-const webRoutes = require('./src/routes/webRoutes');
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/cafe', cafeRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/clients', clientRoutes);
+app.use('/api/marketing', marketingRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/', webRoutes); // Montar las rutas web sin prefijo
+app.use('/', webRoutes); // Rutas web
 
 // Vista de prueba Pug
 app.get('/test-pug', (req, res) => {
@@ -60,7 +85,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

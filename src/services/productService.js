@@ -1,41 +1,32 @@
-const FileService = require('./fileService');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const fileService = require('./fileService');
 const Product = require('../models/Product');
 
-class ProductService {
-  static async getAllProducts() {
-    return await FileService.readFile('products.json');
-  }
+const PRODUCTS_FILE = path.resolve(__dirname, '..', 'data', 'products.json');
 
-  static async getProductById(id) {
-    const products = await this.getAllProducts();
-    return products.find((product) => product.id === id);
-  }
-
-  static async createProduct(data) {
-    const products = await this.getAllProducts();
-    const newProduct = new Product(data);
-    products.push(newProduct);
-    await FileService.writeFile('products.json', products);
-    return newProduct;
-  }
-
-  static async updateProduct(id, data) {
-    const products = await this.getAllProducts();
-    const index = products.findIndex((product) => product.id === id);
-    if (index === -1) throw new Error('Producto no encontrado');
-    products[index] = { ...products[index], ...data };
-    await FileService.writeFile('products.json', products);
-    return products[index];
-  }
-
-  static async deleteProduct(id) {
-    const products = await this.getAllProducts();
-    const filteredProducts = products.filter((product) => product.id !== id);
-    if (filteredProducts.length === products.length) {
-      throw new Error('Producto no encontrado');
-    }
-    await FileService.writeFile('products.json', filteredProducts);
-  }
+async function getAllProducts() {
+  return await fileService.readFile(PRODUCTS_FILE);
 }
 
-module.exports = ProductService;
+async function createProduct(data) {
+  const products = await fileService.readFile(PRODUCTS_FILE);
+  const product = new Product({ ...data, id: uuidv4() });
+  products.push(product);
+  await fileService.writeFile(PRODUCTS_FILE, products);
+  return product;
+}
+
+async function updateProduct(id, data) {
+  const products = await fileService.readFile(PRODUCTS_FILE);
+  const index = products.findIndex(p => p.id === id);
+  if (index === -1) {
+    throw new Error('Producto no encontrado');
+  }
+  const updatedProduct = new Product({ ...products[index], ...data, id });
+  products[index] = updatedProduct;
+  await fileService.writeFile(PRODUCTS_FILE, products);
+  return updatedProduct;
+}
+
+module.exports = { getAllProducts, createProduct, updateProduct };

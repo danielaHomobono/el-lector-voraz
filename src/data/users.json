@@ -1,0 +1,26 @@
+[
+  {
+    "id": "admin-001",
+    "email": "admin1@lectorvoraz.com",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "id": "admin-002",
+    "email": "admin2@lectorvoraz.com",
+    "password": "admin456",
+    "role": "admin"
+  },
+  {
+    "id": "admin-003",
+    "email": "admin3@lectorvoraz.com",
+    "password": "admin789",
+    "role": "admin"
+  },
+  {
+    "id": "user-001",
+    "email": "user@lectorvoraz.com",
+    "password": "user123",
+    "role": "user"
+  }
+]

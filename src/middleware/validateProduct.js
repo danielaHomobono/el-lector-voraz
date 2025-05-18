@@ -1,27 +1,15 @@
-const validateProduct = (req, res, next) => {
-  const { type, price, stock, category, title, author, isbn, name } = req.body;
-
-  if (!type || !price || !stock || !category) {
-    return res.status(400).json({ error: 'Faltan campos requeridos: type, price, stock o category' });
+function validateProduct(req, res, next) {
+  const { type, title, price, stock, category, author, isbn } = req.body;
+  if (!type || !title || !price || !stock || !category) {
+    return res.status(400).json({ error: 'Faltan campos requeridos' });
   }
-
-  if (typeof price !== 'number' || typeof stock !== 'number') {
-    return res.status(400).json({ error: 'price y stock deben ser números' });
+  if (type === 'book' && (!author || !isbn)) {
+    return res.status(400).json({ error: 'Autor e ISBN requeridos para libros' });
   }
-
-  if (type === 'book') {
-    if (!title || !author || !isbn) {
-      return res.status(400).json({ error: 'Faltan campos requeridos para "book": title, author, isbn' });
-    }
+  if (price < 0 || stock < 0) {
+    return res.status(400).json({ error: 'Precio y stock deben ser no negativos' });
   }
-
-  if (type === 'cafe') {
-    if (!name) {
-      return res.status(400).json({ error: 'Falta el campo "name" para producto tipo "cafe"' });
-    }
-  }
-
   next();
-};
+}
 
 module.exports = validateProduct;

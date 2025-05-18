@@ -1,27 +1,28 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-class FileService {
-  static async readFile(fileName) {
-    try {
-      const filePath = path.join(__dirname, '../data', fileName);
-      const data = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(data);
-    } catch (error) {
-      console.error(`Error al leer ${fileName}:`, error);
-      return []; // Retorna vacío si hay error
+async function readFile(filePath) {
+  console.log('Intentando leer archivo:', filePath);
+  try {
+    const data = await fs.readFile(filePath, 'utf8');
+    const parsed = JSON.parse(data);
+    console.log('Archivo leído correctamente:', filePath);
+    return parsed;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log(`Archivo no encontrado, creando ${filePath} con []`);
+      await fs.writeFile(filePath, '[]');
+      return [];
     }
-  }
-
-  static async writeFile(fileName, data) {
-    try {
-      const filePath = path.join(__dirname, '../data', fileName);
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
-    } catch (error) {
-      console.error(`Error al escribir ${fileName}:`, error);
-      throw new Error('Error al guardar los datos');
-    }
+    console.error(`Error al leer ${filePath}:`, error);
+    throw error;
   }
 }
 
-module.exports = FileService;
+async function writeFile(filePath, data) {
+  console.log('Escribiendo archivo:', filePath);
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+  console.log('Archivo escrito correctamente:', filePath);
+}
+
+module.exports = { readFile, writeFile };

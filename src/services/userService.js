@@ -3,6 +3,10 @@ const fileService = require('./fileService');
 
 const USERS_FILE = path.resolve(__dirname, '..', 'data', 'users.json');
 
+async function getAllUsers() {
+  return await fileService.readFile(USERS_FILE);
+}
+
 async function loginUser({ email, password }) {
   console.log('Intentando leer USERS_FILE:', USERS_FILE);
   const users = await fileService.readFile(USERS_FILE);
@@ -14,4 +18,4 @@ async function loginUser({ email, password }) {
   return { id: user.id, email: user.email, role: user.role };
 }
 
-module.exports = { loginUser };
+module.exports = { loginUser, getAllUsers };

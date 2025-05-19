@@ -13,9 +13,11 @@ async function createSale(data) {
   const sales = await fileService.readFile(SALES_FILE);
   const products = await ProductService.getAllProducts();
   const cafeProducts = await CafeService.getAllProducts();
-  const client = data.clientId ? await ClientService.getClientById(data.clientId) : null;
+  const clients = await ClientService.getAllClients();
+  const client = data.clientId ? clients.find(c => c.id === data.clientId) : null;
 
   let total = 0;
+
   for (const item of data.items) {
     let product;
     if (item.type === 'cafe') {
@@ -29,16 +31,18 @@ async function createSale(data) {
     total += product.price * item.quantity;
   }
 
+  // Redimir puntos si corresponde
   if (data.redeemPoints && client) {
     if (data.redeemPoints % 10 !== 0) throw new Error('Los puntos deben ser múltiplos de 10');
-    await ClientService.redeemPoints(client.id, data.redeemPoints);
-    total -= (data.redeemPoints / 10) * 1000; // 10 puntos = $1000
+    if (client.points < data.redeemPoints) throw new Error('Puntos insuficientes');
+    client.points -= data.redeemPoints;
+    total -= (data.redeemPoints / 10) * 1000;
   }
 
+  // Acreditar puntos si no redimió
   if (client && !data.redeemPoints) {
     const points = Math.floor(total / 1000);
     client.points += points;
-    await fileService.writeFile(CLIENTS_FILE, await ClientService.getAllClients());
   }
 
   const sale = new Sale({
@@ -51,9 +55,13 @@ async function createSale(data) {
   });
 
   sales.push(sale);
+
+  // Guardar todos los cambios
   await fileService.writeFile(SALES_FILE, sales);
   await fileService.writeFile(path.resolve(__dirname, '..', 'data', 'products.json'), products);
   await fileService.writeFile(path.resolve(__dirname, '..', 'data', 'cafe_products.json'), cafeProducts);
+  await fileService.writeFile(CLIENTS_FILE, clients);
+
   return sale;
 }
 

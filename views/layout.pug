@@ -1,5 +1,25 @@
-html
+doctype html
+html(lang="es")
   head
-    title #{title}
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title El Lector Voraz
+    link(rel="stylesheet", href="/styles.css")
   body
-    h1 #{message}
+    header
+      h1 El Lector Voraz
+      nav
+        ul
+          li: a(href="/catalogo") Catálogo de Libros
+          li: a(href="/cafes") Cafetería
+          li: a(href="/clientes") Clientes
+          li: a(href="/ventas") Ventas
+          // Mostrar opciones de sesión según autenticación
+          if user
+            li: a(href="/logout") Cerrar sesión (#{user.username})
+          else
+            li: a(href="/login") Iniciar sesión
+    main
+      block content
+    footer
+      p © #{new Date().getFullYear()} El Lector Voraz

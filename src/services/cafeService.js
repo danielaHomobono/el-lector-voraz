@@ -5,7 +5,7 @@ const CafeProduct = require('../models/CafeProduct');
 
 const CAFE_FILE = path.resolve(__dirname, '..', 'data', 'cafe_products.json');
 
-async function getAllProducts() {
+async function getAllCafes() {
   return await fileService.readFile(CAFE_FILE);
 }
 
@@ -29,4 +29,4 @@ async function updateProduct(id, data) {
   return updatedProduct;
 }
 
-module.exports = { getAllProducts, createProduct, updateProduct };
+module.exports = { getAllCafes, createProduct, updateProduct };

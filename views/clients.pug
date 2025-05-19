@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1 Lista de Clientes
+  .clients-container
+    each client in clients
+      .client-card
+        h2= client.name
+        p Email: #{client.email}
+        p Puntos: #{client.points}
+        hr

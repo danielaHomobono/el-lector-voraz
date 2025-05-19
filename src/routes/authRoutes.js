@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const userService = require('../services/userService');
 
+// Mostrar formulario de login
+router.get('/login', (req, res) => {
+  res.render('login');
+});
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;

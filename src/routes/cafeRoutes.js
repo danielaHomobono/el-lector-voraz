@@ -1,33 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const cafeService = require('../services/cafeService');
-const authMiddleware = require('../middleware/authMiddleware');
+// src/routes/cafeRoutes.js
+  const express = require('express');
+  const router = express.Router();
+  const cafeController = require('../controllers/cafeController');
+  const authMiddleware = require('../middleware/authMiddleware');
 
-router.get('/', async (req, res) => {
-  try {
-    const products = await cafeService.getAllProducts();
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+  router.get('/', cafeController.getAllCafes);
+  router.post('/', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, cafeController.createCafe);
+  router.put('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, cafeController.updateCafe);
+  router.delete('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, cafeController.deleteCafe);
 
-router.post('/', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {
-  try {
-    const product = await cafeService.createProduct(req.body);
-    res.status(201).json(product);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-router.put('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {
-  try {
-    const product = await cafeService.updateProduct(req.params.id, req.body);
-    res.json(product);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-module.exports = router;
+  module.exports = router;

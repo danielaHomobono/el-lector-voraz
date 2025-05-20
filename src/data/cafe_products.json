@@ -1,9 +1,16 @@
 [
   {
     "id": "e5a7438f-0897-4985-985c-b08396aed4bc",
-    "name": "Café Americano",
-    "price": 3000,
-    "stock": 46,
+    "name": "Café Americano Doble",
+    "price": 3500,
+    "stock": 50,
+    "category": "Bebida"
+  },
+  {
+    "id": "e2257617-e204-47dd-8757-3fe69cee6bf5",
+    "name": "Latte",
+    "price": 4500,
+    "stock": 80,
     "category": "Bebida"
   }
 ]

@@ -6,7 +6,7 @@
     "author": "Vladimir Nabokov",
     "isbn": "978-3-16-148410-0",
     "price": 20000,
-    "stock": 5,
+    "stock": 4,
     "category": "Novela",
     "consignment": false
   },
@@ -31,5 +31,29 @@
     "price": 100,
     "stock": 10,
     "category": "Ficción"
+  },
+  {
+    "id": "3d772c3f-5823-4f97-a74c-f8ded4e8f402",
+    "title": "tata Libro",
+    "author": "Autor Ejemplo",
+    "isbn": "77777555444",
+    "price": 29.99,
+    "stock": 10
+  },
+  {
+    "id": "d46ccdc0-9a19-4dad-9380-02d33f875cbb",
+    "title": "La Sombra del Viento",
+    "author": "Carlos Ruiz Zafón",
+    "isbn": "9780142437230",
+    "price": 22,
+    "stock": 40
+  },
+  {
+    "id": "901d2efc-9f54-4e24-8dac-8dcc1fa9d821",
+    "title": "Nuevo Libro",
+    "author": "Autor Ejemplo",
+    "isbn": "9780142455230",
+    "price": 29.99,
+    "stock": 10
   }
 ]

@@ -2,10 +2,9 @@ extends layout
 
 block content
   h1 Usuarios Registrados
-  ul
+  .users-container
     each user in users
-      li
-        h2= user.username
-        p Email: #{user.email}
+      .user-card
+        h2= user.email
         p Rol: #{user.role}
         hr

@@ -2,14 +2,15 @@ extends layout
 
 block content
   h1 Catálogo de Libros
-  ul
+  .catalog-container
     each product in products
       if product.type === 'book'
-        li
+        .book-card
           h2= product.title
           p Autor: #{product.author}
           p ISBN: #{product.isbn}
           p Precio: $#{product.price}
           p Stock: #{product.stock}
-          p Categoría: #{product.category}
+          if product.category
+            p Categoría: #{product.category}
           hr

@@ -1,24 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const marketingService = require('../services/marketingService');
-const authMiddleware = require('../middleware/authMiddleware');
+// src/routes/marketingRoutes.js
+  const express = require('express');
+  const router = express.Router();
+  const marketingController = require('../controllers/marketingController');
+  const authMiddleware = require('../middleware/authMiddleware');
 
-router.get('/', async (req, res) => {
-  try {
-    const posts = await marketingService.getAllPosts();
-    res.json(posts);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+  router.get('/posts', marketingController.getAllPosts);
+  router.post('/posts', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, marketingController.createPost);
+  router.put('/posts/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, marketingController.updatePost);
+  router.delete('/posts/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, marketingController.deletePost);
 
-router.post('/posts', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {
-  try {
-    const post = await marketingService.createPost(req.body);
-    res.status(201).json(post);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-module.exports = router;
+  module.exports = router;

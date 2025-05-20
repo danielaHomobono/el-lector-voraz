@@ -1,32 +1,52 @@
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const fileService = require('./fileService');
-const Product = require('../models/Product');
+// src/services/productService.js
+  const fileService = require('./fileService');
+  const { generateUUID } = require('../utils/uuid');
 
-const PRODUCTS_FILE = path.resolve(__dirname, '..', 'data', 'products.json');
-
-async function getAllProducts() {
-  return await fileService.readFile(PRODUCTS_FILE);
-}
-
-async function createProduct(data) {
-  const products = await fileService.readFile(PRODUCTS_FILE);
-  const product = new Product({ ...data, id: uuidv4() });
-  products.push(product);
-  await fileService.writeFile(PRODUCTS_FILE, products);
-  return product;
-}
-
-async function updateProduct(id, data) {
-  const products = await fileService.readFile(PRODUCTS_FILE);
-  const index = products.findIndex(p => p.id === id);
-  if (index === -1) {
-    throw new Error('Producto no encontrado');
+  async function getProducts() {
+    return await fileService.readFile('src/data/products.json');
   }
-  const updatedProduct = new Product({ ...products[index], ...data, id });
-  products[index] = updatedProduct;
-  await fileService.writeFile(PRODUCTS_FILE, products);
-  return updatedProduct;
-}
 
-module.exports = { getAllProducts, createProduct, updateProduct };
+  async function createProduct(productData) {
+    const products = await getProducts();
+    const newProduct = {
+      id: generateUUID(),
+      title: productData.title,
+      author: productData.author,
+      isbn: productData.isbn,
+      price: productData.price,
+      stock: productData.stock
+    };
+    products.push(newProduct);
+    await fileService.writeFile('src/data/products.json', products);
+    return newProduct;
+  }
+
+  async function updateProduct(id, productData) {
+    const products = await getProducts();
+    const index = products.findIndex(p => p.id === id);
+    if (index === -1) {
+      throw new Error('Producto no encontrado');
+    }
+    products[index] = {
+      id,
+      title: productData.title,
+      author: productData.author,
+      isbn: productData.isbn,
+      price: productData.price,
+      stock: productData.stock
+    };
+    await fileService.writeFile('src/data/products.json', products);
+    return products[index];
+  }
+
+  async function deleteProduct(id) {
+    const products = await getProducts();
+    const index = products.findIndex(p => p.id === id);
+    if (index === -1) {
+      throw new Error('Producto no encontrado');
+    }
+    products.splice(index, 1);
+    await fileService.writeFile('src/data/products.json', products);
+  }
+
+  module.exports = { getProducts, createProduct, updateProduct, deleteProduct };

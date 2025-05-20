@@ -2,11 +2,25 @@ extends layout
 
 block content
   h1 Historial de Ventas
-  ul
+  .sales-container
     each sale in sales
-      li
-        p Producto ID: #{sale.productId}
-        p Cliente ID: #{sale.clientId}
-        p Cantidad: #{sale.quantity}
+      .sale-card
+        h2 Venta #{sale.id}
         p Total: $#{sale.total}
+        p Canal: #{sale.channel}
+        p Fecha: #{sale.date}
+        if sale.items && sale.items.length > 0
+          ul
+            each item in sale.items
+              li
+                p Producto ID: #{item.productId} (#{item.type})
+                p Cantidad: #{item.quantity}
+        else
+          p No hay ítems en esta venta.
+        if sale.clientId
+          p Cliente ID: #{sale.clientId}
+        else
+          p Sin cliente asociado
         hr
+    else
+      p No hay ventas registradas.

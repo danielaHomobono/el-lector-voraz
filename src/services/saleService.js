@@ -1,72 +1,64 @@
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-const fileService = require('./fileService');
-const ProductService = require('./productService');
-const CafeService = require('./cafeService');
-const ClientService = require('./clientService');
-const Sale = require('../models/Sale');
+// src/services/saleService.js
+  const fileService = require('./fileService');
+  const { generateUUID } = require('../utils/uuid');
 
-const SALES_FILE = path.resolve(__dirname, '..', 'data', 'sales.json');
-const CLIENTS_FILE = path.resolve(__dirname, '..', 'data', 'clients.json');
+  async function getSales() {
+    return await fileService.readFile('src/data/sales.json');
+  }
 
-async function createSale(data) {
-  const sales = await fileService.readFile(SALES_FILE);
-  const products = await ProductService.getAllProducts();
-  const cafeProducts = await CafeService.getAllProducts();
-  const clients = await ClientService.getAllClients();
-  const client = data.clientId ? clients.find(c => c.id === data.clientId) : null;
-
-  let total = 0;
-
-  for (const item of data.items) {
-    let product;
-    if (item.type === 'cafe') {
-      product = cafeProducts.find(p => p.id === item.productId);
-    } else {
-      product = products.find(p => p.id === item.productId);
+  async function createSale(saleData) {
+    const sales = await getSales();
+    const products = await fileService.readFile('src/data/products.json');
+    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    const productExists = products.some(p => p.id === saleData.productId) || cafes.some(c => c.id === saleData.productId);
+    if (!productExists) {
+      throw new Error('Producto no encontrado');
     }
-    if (!product) throw new Error(`Producto ${item.productId} no encontrado`);
-    if (product.stock < item.quantity) throw new Error(`Stock insuficiente para ${product.title || product.name}`);
-    product.stock -= item.quantity;
-    total += product.price * item.quantity;
+    const newSale = {
+      id: generateUUID(),
+      productId: saleData.productId,
+      quantity: saleData.quantity,
+      totalPrice: saleData.totalPrice,
+      date: new Date().toISOString(),
+      clientId: saleData.clientId || null
+    };
+    sales.push(newSale);
+    await fileService.writeFile('src/data/sales.json', sales);
+    return newSale;
   }
 
-  // Redimir puntos si corresponde
-  if (data.redeemPoints && client) {
-    if (data.redeemPoints % 10 !== 0) throw new Error('Los puntos deben ser múltiplos de 10');
-    if (client.points < data.redeemPoints) throw new Error('Puntos insuficientes');
-    client.points -= data.redeemPoints;
-    total -= (data.redeemPoints / 10) * 1000;
+  async function updateSale(id, saleData) {
+    const sales = await getSales();
+    const products = await fileService.readFile('src/data/products.json');
+    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    const productExists = products.some(p => p.id === saleData.productId) || cafes.some(c => c.id === saleData.productId);
+    if (!productExists) {
+      throw new Error('Producto no encontrado');
+    }
+    const index = sales.findIndex(s => s.id === id);
+    if (index === -1) {
+      throw new Error('Venta no encontrada');
+    }
+    sales[index] = {
+      id,
+      productId: saleData.productId,
+      quantity: saleData.quantity,
+      totalPrice: saleData.totalPrice,
+      date: sales[index].date,
+      clientId: saleData.clientId || null
+    };
+    await fileService.writeFile('src/data/sales.json', sales);
+    return sales[index];
   }
 
-  // Acreditar puntos si no redimió
-  if (client && !data.redeemPoints) {
-    const points = Math.floor(total / 1000);
-    client.points += points;
+  async function deleteSale(id) {
+    const sales = await getSales();
+    const index = sales.findIndex(s => s.id === id);
+    if (index === -1) {
+      throw new Error('Venta no encontrada');
+    }
+    sales.splice(index, 1);
+    await fileService.writeFile('src/data/sales.json', sales);
   }
 
-  const sale = new Sale({
-    id: uuidv4(),
-    clientId: data.clientId,
-    items: data.items,
-    total,
-    date: new Date(),
-    channel: data.channel || 'physical'
-  });
-
-  sales.push(sale);
-
-  // Guardar todos los cambios
-  await fileService.writeFile(SALES_FILE, sales);
-  await fileService.writeFile(path.resolve(__dirname, '..', 'data', 'products.json'), products);
-  await fileService.writeFile(path.resolve(__dirname, '..', 'data', 'cafe_products.json'), cafeProducts);
-  await fileService.writeFile(CLIENTS_FILE, clients);
-
-  return sale;
-}
-
-async function getAllSales() {
-  return await fileService.readFile(SALES_FILE);
-}
-
-module.exports = { createSale, getAllSales };
+  module.exports = { getSales, createSale, updateSale, deleteSale };

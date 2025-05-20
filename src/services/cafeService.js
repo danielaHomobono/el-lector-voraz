@@ -1,32 +1,50 @@
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const fileService = require('./fileService');
-const CafeProduct = require('../models/CafeProduct');
+// src/services/cafeService.js
+  const fileService = require('./fileService');
+  const { generateUUID } = require('../utils/uuid');
 
-const CAFE_FILE = path.resolve(__dirname, '..', 'data', 'cafe_products.json');
-
-async function getAllCafes() {
-  return await fileService.readFile(CAFE_FILE);
-}
-
-async function createProduct(data) {
-  const products = await fileService.readFile(CAFE_FILE);
-  const product = new CafeProduct({ ...data, id: uuidv4() });
-  products.push(product);
-  await fileService.writeFile(CAFE_FILE, products);
-  return product;
-}
-
-async function updateProduct(id, data) {
-  const products = await fileService.readFile(CAFE_FILE);
-  const index = products.findIndex(p => p.id === id);
-  if (index === -1) {
-    throw new Error('Producto no encontrado');
+  async function getCafes() {
+    return await fileService.readFile('src/data/cafe_products.json');
   }
-  const updatedProduct = new CafeProduct({ ...products[index], ...data, id });
-  products[index] = updatedProduct;
-  await fileService.writeFile(CAFE_FILE, products);
-  return updatedProduct;
-}
 
-module.exports = { getAllCafes, createProduct, updateProduct };
+  async function createCafe(cafeData) {
+    const cafes = await getCafes();
+    const newCafe = {
+      id: generateUUID(),
+      name: cafeData.name,
+      price: cafeData.price,
+      stock: cafeData.stock,
+      category: cafeData.category
+    };
+    cafes.push(newCafe);
+    await fileService.writeFile('src/data/cafe_products.json', cafes);
+    return newCafe;
+  }
+
+  async function updateCafe(id, cafeData) {
+    const cafes = await getCafes();
+    const index = cafes.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error('Café no encontrado');
+    }
+    cafes[index] = {
+      id,
+      name: cafeData.name,
+      price: cafeData.price,
+      stock: cafeData.stock,
+      category: cafeData.category
+    };
+    await fileService.writeFile('src/data/cafe_products.json', cafes);
+    return cafes[index];
+  }
+
+  async function deleteCafe(id) {
+    const cafes = await getCafes();
+    const index = cafes.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error('Café no encontrado');
+    }
+    cafes.splice(index, 1);
+    await fileService.writeFile('src/data/cafe_products.json', cafes);
+  }
+
+  module.exports = { getCafes, createCafe, updateCafe, deleteCafe };

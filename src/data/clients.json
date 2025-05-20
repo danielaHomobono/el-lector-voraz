@@ -40,5 +40,23 @@
     "name": "Juan Pérez",
     "email": "juan@lectorvoraz.com",
     "points": 0
+  },
+  {
+    "id": "e9e96a30-89e5-40eb-ad91-4edc3e48e0f5",
+    "name": "Ana López",
+    "email": "ana@lectorvoraz.com",
+    "phone": "9876543210"
+  },
+  {
+    "id": "3bde28f7-1613-48f0-9a73-7511ef2a90fe",
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "points": 100
+  },
+  {
+    "id": "8bc511ac-1cf6-4a21-8dfc-d3a8fa757171",
+    "name": "Lola Gramayo",
+    "email": "juaitag@hotmail.com",
+    "points": 0
   }
 ]

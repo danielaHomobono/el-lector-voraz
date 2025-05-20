@@ -22,5 +22,11 @@
     "email": "user@lectorvoraz.com",
     "password": "user123",
     "role": "user"
+  },
+  {
+    "id": "d501f2bc-4fdd-464d-827f-0381f0f22a56",
+    "email": "nuevo@lectorvoraz.com",
+    "password": "contraseña123",
+    "role": "client"
   }
 ]

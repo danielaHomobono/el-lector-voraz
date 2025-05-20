@@ -1,3 +1,4 @@
+
 extends layout
 
 block content
@@ -7,5 +8,6 @@ block content
       .client-card
         h2= client.name
         p Email: #{client.email}
-        p Puntos: #{client.points}
+        if client.points
+          p Puntos: #{client.points}
         hr

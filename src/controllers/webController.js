@@ -1,96 +1,96 @@
 // src/controllers/webController.js
-  const cafeService = require('../services/cafeService');
-  const productService = require('../services/productService');
-  const clientService = require('../services/clientService');
-  const saleService = require('../services/saleService');
-  const userService = require('../services/userService');
+const fileService = require('../services/fileService');
+const { handleError } = require('../utils/errorHandler');
 
-  async function home(req, res) {
-    res.render('index', { user: req.user });
+async function loginPage(req, res) {
+  if (req.session.user) {
+    return res.redirect('/');
   }
+  res.render('login', { title: 'Iniciar Sesión', error: null });
+}
 
-  async function loginPage(req, res) {
-    res.render('login');
+async function homePage(req, res) {
+  try {
+    res.render('index', { 
+      title: 'Inicio',
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
   }
+}
 
-  async function cafePage(req, res) {
-    try {
-      const cafes = await cafeService.getCafeProducts();
-      res.render('cafes', { cafes, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar la lista de cafés', user: req.user });
-    }
+async function productsPage(req, res) {
+  try {
+    const products = await fileService.readFile('src/data/products.json');
+    res.render('products', { 
+      title: 'Catálogo de Libros',
+      products,
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
   }
+}
 
-  async function productPage(req, res) {
-    try {
-      const products = await productService.getProducts();
-      res.render('products', { products, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar el catálogo de libros', user: req.user });
-    }
+async function cafesPage(req, res) {
+  try {
+    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    res.render('cafes', { 
+      title: 'Cafetería',
+      cafes,
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
   }
+}
 
-  async function clientPage(req, res) {
-    try {
-      const clients = await clientService.getClients();
-      res.render('clientes', { clients, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar la lista de clientes', user: req.user });
-    }
+async function clientsPage(req, res) {
+  try {
+    const clients = await fileService.readFile('src/data/clients.json');
+    res.render('clients', { 
+      title: 'Clientes',
+      clients,
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
   }
+}
 
-  async function salesPage(req, res) {
-    try {
-      const sales = await saleService.getSales();
-      res.render('sales', { sales, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar la lista de ventas', user: req.user });
-    }
+async function salesPage(req, res) {
+  try {
+    const sales = await fileService.readFile('src/data/sales.json');
+    res.render('sales', { 
+      title: 'Ventas',
+      sales,
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
   }
+}
 
-  async function userPage(req, res) {
-    try {
-      const users = await userService.getUsers();
-      res.render('users', { users, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar la lista de usuarios', user: req.user });
-    }
+async function usersPage(req, res) {
+  try {
+    const users = await fileService.readFile('src/data/users.json');
+    res.render('users', { 
+      title: 'Usuarios',
+      users,
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
   }
+}
 
-  async function inventoryPage(req, res) {
-    try {
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).render('error', { message: 'Acceso denegado: Solo administradores', user: req.user });
-      }
-      const products = await productService.getProducts();
-      const cafes = await cafeService.getCafeProducts();
-      const inventory = {
-        books: products.filter(p => p.type === 'book'),
-        cafes
-      };
-      res.render('inventory', { inventory, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar el reporte de inventario', user: req.user });
-    }
-  }
-
-  async function financialPage(req, res) {
-    try {
-      if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).render('error', { message: 'Acceso denegado: Solo administradores', user: req.user });
-      }
-      const sales = await saleService.getSales();
-      const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
-      const report = {
-        totalSales: sales.length,
-        totalRevenue,
-        sales
-      };
-      res.render('financial', { report, user: req.user });
-    } catch (error) {
-      res.render('error', { message: 'Error al cargar el reporte financiero', user: req.user });
-    }
-  }
-
-  module.exports = { home, loginPage, cafePage, productPage, clientPage, salesPage, userPage, inventoryPage, financialPage };
+module.exports = {
+  loginPage,
+  homePage,
+  productsPage,
+  cafesPage,
+  clientsPage,
+  salesPage,
+  usersPage
+};

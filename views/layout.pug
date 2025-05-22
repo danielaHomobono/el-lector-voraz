@@ -10,13 +10,17 @@ html(lang="es")
       h1 El Lector Voraz
       nav
         ul
-          li: a(href="/products") Catálogo de Libros
-          li: a(href="/cafes") Cafetería
-          li: a(href="/clients") Clientes
-          li: a(href="/sales") Ventas
-          li: a(href="/users") Usuarios
           if user
-            li: a(href="/api/auth/logout") Cerrar sesión (#{user.email})
+            if user.role === 'admin'
+              li: a(href="/products") Catálogo de Libros
+              li: a(href="/cafes") Cafetería
+              li: a(href="/clients") Clientes
+              li: a(href="/sales") Ventas
+              li: a(href="/users") Usuarios
+            else
+              li: a(href="/products") Catálogo de Libros
+              li: a(href="/cafes") Cafetería
+            li: a(href="/logout") Cerrar sesión (#{user.email})
           else
             li: a(href="/login") Iniciar sesión
     main

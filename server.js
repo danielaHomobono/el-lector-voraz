@@ -13,6 +13,7 @@ const authController = require('./src/controllers/authController');
 const fileService = require('./src/services/fileService');
 const path = require('path');
 const fs = require('fs');
+const webRoutes = require('./src/routes/webRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -152,6 +153,8 @@ app.get('/financial', async (req, res) => {
     res.status(500).send(`Error al generar el reporte financiero: ${error.message}`);
   }
 });
+
+app.use('/', webRoutes);
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {

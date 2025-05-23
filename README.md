@@ -35,9 +35,8 @@ npm install
 
 3. Configurar variables de entorno:
 ```bash
-cp .env.example .env
-# Editar el archivo .env con tus configuraciones
-```
+- `PORT`: Puerto en el que se ejecutará el servidor (por defecto: 3000)
+- `API_KEY`: Clave de API para acceder a los endpoints protegidos (ejemplo: "el-voraz-2025")
 
 ## Uso
 

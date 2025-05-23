@@ -162,3 +162,52 @@
     margin-bottom: 1rem;
     text-align: center;
   }
+
+  .add-book-form {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .add-book-form h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+
+  .add-book-form .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .add-book-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #666;
+  }
+
+  .add-book-form input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .add-book-form button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #3e3e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .add-book-form button:hover {
+    background: #2c2c2c;
+  }

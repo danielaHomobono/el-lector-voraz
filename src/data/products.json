@@ -95,5 +95,12 @@
     "isbn": "978-0-316-76948-0",
     "price": 15.99,
     "stock": 5
+=======
+    "id": "8e593c3f-2915-4de2-863a-bd5026a3a5b8",
+    "title": "El misterio",
+    "author": "Roma Zagordo",
+    "isbn": "978-3-16-148410-1",
+    "price": 30000,
+    "stock": 15
   }
 ]

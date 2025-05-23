@@ -57,6 +57,45 @@
     "stock": 10
   },
   {
+    "id": "f19b6a05-5452-4b26-bdc5-1b2a92ed5a35",
+    "title": "To Kill a Mockingbird",
+    "author": "Harper Lee",
+    "isbn": "978-0-06-112008-4",
+    "price": 39.99,
+    "stock": 20
+  },
+  {
+    "id": "4e9ab45c-6afb-46b5-b23d-c1d12a5395ab",
+    "title": "1982",
+    "author": "George Orwell",
+    "isbn": "978-0-452-28423-4",
+    "price": 29.99,
+    "stock": 30
+  },
+  {
+    "id": "240110df-6209-4909-ba04-3dbd0f7ab2ef",
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "isbn": "978-0-7432-7356-5",
+    "price": 19.99,
+    "stock": 10
+  },
+  {
+    "id": "ff767476-0d67-4dcf-9a1e-12c1e03ad4dd",
+    "title": "Pride and Prejudice",
+    "author": "Jane Austin",
+    "isbn": "978-0-14-143951-8",
+    "price": 25.99,
+    "stock": 15
+  },
+  {
+    "id": "ca23a765-1a0e-42e5-8876-19002b44016f",
+    "title": "The Catcher in the Rye",
+    "author": "J.D. Salinger",
+    "isbn": "978-0-316-76948-0",
+    "price": 15.99,
+    "stock": 5
+=======
     "id": "8e593c3f-2915-4de2-863a-bd5026a3a5b8",
     "title": "El misterio",
     "author": "Roma Zagordo",

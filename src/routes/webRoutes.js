@@ -13,6 +13,7 @@ router.get('/products', authMiddleware.requireAuth, webController.productsPage);
 router.get('/cafes', authMiddleware.requireAuth, webController.cafesPage);
 
 // Rutas de administrador
+router.get('/inventory', authMiddleware.requireAdmin, webController.inventoryPage);
 router.get('/clients', authMiddleware.requireAdmin, webController.clientsPage);
 router.get('/sales', authMiddleware.requireAdmin, webController.salesPage);
 router.get('/users', authMiddleware.requireAdmin, webController.usersPage);

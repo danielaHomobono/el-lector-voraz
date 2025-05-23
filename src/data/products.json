@@ -63,5 +63,15 @@
     "isbn": "978-3-16-148410-1",
     "price": 30000,
     "stock": 15
+  },
+  {
+    "id": "1e2878b9-e40d-40b4-ab30-d4e53dc2314d",
+    "title": "El Padrino",
+    "author": "Autor Renombrado",
+    "isbn": "978-3-16-148410-5",
+    "price": 35000,
+    "stock": 6,
+    "type": "book",
+    "category": "Drama"
   }
 ]

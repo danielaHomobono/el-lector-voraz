@@ -1,4 +1,5 @@
 // src/controllers/webController.js
+const productService = require('../services/productService');
 const fileService = require('../services/fileService');
 const { handleError } = require('../utils/errorHandler');
 
@@ -22,7 +23,7 @@ async function homePage(req, res) {
 
 async function productsPage(req, res) {
   try {
-    const products = await fileService.readFile('src/data/products.json');
+    const products = await productService.getProducts();
     res.render('products', { 
       title: 'Catálogo de Libros',
       products,
@@ -48,7 +49,7 @@ async function cafesPage(req, res) {
 
 async function inventoryPage(req, res) {
   try {
-    const products = await fileService.readFile('src/data/products.json');
+    const products = await productService.getProducts();
     const cafes = await fileService.readFile('src/data/cafe_products.json');
     res.render('inventory', { 
       title: 'Inventario',

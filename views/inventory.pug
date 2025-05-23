@@ -70,38 +70,77 @@ block content
           }
         });
 
-  h2 Libros
-  if products && products.length > 0
-    table(border='1')
-      tr
-        th Título
-        th Autor
-        th ISBN
-        th Precio
-        th Stock
-      each product in products
-        tr
-          td= product.title
-          td= product.author
-          td= product.isbn
-          td= product.price
-          td= product.stock
-  else
-    p No hay libros en inventario.
+  .inventory-container
+    .inventory-section
+      h2 Libros
+      if products && products.length > 0
+        table(border='1')
+          tr
+            th Título
+            th Autor
+            th ISBN
+            th Precio
+            th Stock
+          each product in products
+            tr
+              td= product.title
+              td= product.author
+              td= product.isbn
+              td= product.price
+              td= product.stock
+      else
+        p No hay libros en inventario.
 
-  h2 Cafés
-  if cafes && cafes.length > 0
-    table(border='1')
-      tr
-        th Nombre
-        th Categoría
-        th Precio
-        th Stock
-      each cafe in cafes
-        tr
-          td= cafe.name
-          td= cafe.category
-          td= cafe.price
-          td= cafe.stock
-  else
-    p No hay cafés en inventario.
+    .inventory-section
+      h2 Cafés
+      if cafes && cafes.length > 0
+        table(border='1')
+          tr
+            th Nombre
+            th Categoría
+            th Precio
+            th Stock
+          each cafe in cafes
+            tr
+              td= cafe.name
+              td= cafe.category
+              td= cafe.price
+              td= cafe.stock
+      else
+        p No hay cafés en inventario.
+
+  style.
+    .inventory-container {
+      display: flex;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    
+    .inventory-section {
+      flex: 1;
+      min-width: 0; /* Evita que las tablas se desborden */
+    }
+    
+    .inventory-section table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    
+    .inventory-section th,
+    .inventory-section td {
+      padding: 0.5rem;
+      text-align: left;
+    }
+    
+    .inventory-section h2 {
+      margin-bottom: 1rem;
+    }
+    
+    .add-book-form {
+      margin-bottom: 2rem;
+    }
+    /* NUEVO: margen inferior para evitar que el footer tape contenido */
+    main {
+      margin-bottom: 6rem;
+    }

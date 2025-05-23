@@ -28,11 +28,11 @@ console.log('Directorio de vistas configurado:', viewsPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Para parsear formularios
 app.use(session({
-  secret: 'el-lector-voraz-secret',
-  resave: true,
-  saveUninitialized: true,
+  secret: process.env.SESSION_SECRET || 'tu-secreto-seguro',
+  resave: false,
+  saveUninitialized: false,
   cookie: {
-    secure: false, // Cambiar a true en producción con HTTPS
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));

@@ -13,6 +13,7 @@ const authController = require('./src/controllers/authController');
 const fileService = require('./src/services/fileService');
 const path = require('path');
 const fs = require('fs');
+const webRoutes = require('./src/routes/webRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -27,11 +28,11 @@ console.log('Directorio de vistas configurado:', viewsPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Para parsear formularios
 app.use(session({
-  secret: 'el-lector-voraz-secret',
-  resave: true,
-  saveUninitialized: true,
+  secret: process.env.SESSION_SECRET || 'tu-secreto-seguro',
+  resave: false,
+  saveUninitialized: false,
   cookie: {
-    secure: false, // Cambiar a true en producción con HTTPS
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
@@ -152,6 +153,8 @@ app.get('/financial', async (req, res) => {
     res.status(500).send(`Error al generar el reporte financiero: ${error.message}`);
   }
 });
+
+app.use('/', webRoutes);
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {

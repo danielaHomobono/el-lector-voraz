@@ -46,6 +46,21 @@ async function cafesPage(req, res) {
   }
 }
 
+async function inventoryPage(req, res) {
+  try {
+    const products = await fileService.readFile('src/data/products.json');
+    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    res.render('inventory', { 
+      title: 'Inventario',
+      products,
+      cafes,
+      user: req.session.user
+    });
+  } catch (error) {
+    handleError(res, error, 500);
+  }
+}
+
 async function clientsPage(req, res) {
   try {
     const clients = await fileService.readFile('src/data/clients.json');
@@ -90,6 +105,7 @@ module.exports = {
   homePage,
   productsPage,
   cafesPage,
+  inventoryPage,
   clientsPage,
   salesPage,
   usersPage

@@ -24,6 +24,7 @@ const requireAuth = (req, res, next) => {
 
 // Middleware para proteger rutas web de admin
 const requireAdmin = (req, res, next) => {
+  console.log('DEBUG requireAdmin - req.session:', req.session);
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).render('error', { 
       title: 'Acceso Denegado',

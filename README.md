@@ -76,7 +76,7 @@ Obtienes el listado de libros en formato JSON.
 Debes enviar la API Key en el header (por seguridad).
 Ejemplo de header:
 ```text
-x-api-key: EL_VORAZ_2025
+x-voraz-key: EL_VORAZ_2025
 ```
 El cuerpo debe ser un JSON con los datos del libro.
 

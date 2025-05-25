@@ -16,7 +16,6 @@
     "title": "Aquí hay dragones",
     "author": "Florencia Bonelli",
     "isbn": "978-3-16-148410-0",
-    "name": null,
     "price": 16000,
     "stock": 8,
     "category": "Novela"
@@ -27,51 +26,108 @@
     "title": "El Principito",
     "author": "Antoine de Saint-Exupéry",
     "isbn": "1234567890",
-    "name": null,
     "price": 100,
     "stock": 10,
     "category": "Ficción"
   },
   {
     "id": "3d772c3f-5823-4f97-a74c-f8ded4e8f402",
+    "type": "book",
     "title": "tata Libro",
     "author": "Autor Ejemplo",
     "isbn": "77777555444",
     "price": 29.99,
-    "stock": 10
+    "stock": 10,
+    "category": "Ficción"
   },
   {
     "id": "d46ccdc0-9a19-4dad-9380-02d33f875cbb",
+    "type": "book",
     "title": "La Sombra del Viento",
     "author": "Carlos Ruiz Zafón",
     "isbn": "9780142437230",
     "price": 22,
-    "stock": 40
+    "stock": 40,
+    "category": "Novela"
   },
   {
     "id": "901d2efc-9f54-4e24-8dac-8dcc1fa9d821",
+    "type": "book",
     "title": "Nuevo Libro",
     "author": "Autor Ejemplo",
     "isbn": "9780142455230",
     "price": 29.99,
-    "stock": 10
+    "stock": 10,
+    "category": "Relatos"
+  },
+  {
+    "id": "f19b6a05-5452-4b26-bdc5-1b2a92ed5a35",
+    "type": "book",
+    "title": "To Kill a Mockingbird",
+    "author": "Harper Lee",
+    "isbn": "978-0-06-112008-4",
+    "price": 39.99,
+    "stock": 20,
+    "category": "Clasicos"
+  },
+  {
+    "id": "4e9ab45c-6afb-46b5-b23d-c1d12a5395ab",
+    "type": "book",
+    "title": "1982",
+    "author": "George Orwell",
+    "isbn": "978-0-452-28423-4",
+    "price": 29.99,
+    "stock": 30,
+    "category": "Ficción"
   },
   {
     "id": "8e593c3f-2915-4de2-863a-bd5026a3a5b8",
+    "type": "book",
     "title": "El misterio",
     "author": "Roma Zagordo",
     "isbn": "978-3-16-148410-1",
     "price": 30000,
-    "stock": 15
+    "stock": 15,
+    "category": "Ficción"
   },
   {
     "id": "1e2878b9-e40d-40b4-ab30-d4e53dc2314d",
+    "type": "book",
     "title": "El Padrino",
     "author": "Autor Renombrado",
     "isbn": "978-3-16-148410-5",
     "price": 35000,
     "stock": 6,
-    "type": "book",
     "category": "Drama"
+  },
+  {
+    "id": "240110df-6209-4909-ba04-3dbd0f7ab2ef",
+    "type": "book",
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "isbn": "978-0-7432-7356-5",
+    "price": 19.99,
+    "stock": 10,
+    "category": "Novela"
+  },
+  {
+    "id": "ff767476-0d67-4dcf-9a1e-12c1e03ad4dd",
+    "type": "book",
+    "title": "Pride and Prejudice",
+    "author": "Jane Austin",
+    "isbn": "978-0-14-143951-8",
+    "price": 25.99,
+    "stock": 15,
+    "category": "Clasicos"
+  },
+  {
+    "id": "ca23a765-1a0e-42e5-8876-19002b44016f",
+    "type": "book",
+    "title": "The Catcher in the Rye",
+    "author": "J.D. Salinger",
+    "isbn": "978-0-316-76948-0",
+    "price": 15.99,
+    "stock": 5,
+    "category": "Novela"
   }
 ]

@@ -16,7 +16,6 @@
     "title": "Aquí hay dragones",
     "author": "Florencia Bonelli",
     "isbn": "978-3-16-148410-0",
-    "name": null,
     "price": 16000,
     "stock": 8,
     "category": "Novela"
@@ -27,7 +26,6 @@
     "title": "El Principito",
     "author": "Antoine de Saint-Exupéry",
     "isbn": "1234567890",
-    "name": null,
     "price": 100,
     "stock": 10,
     "category": "Ficción"
@@ -83,6 +81,26 @@
     "category": "Ficción"
   },
   {
+    "id": "8e593c3f-2915-4de2-863a-bd5026a3a5b8",
+    "type": "book",
+    "title": "El misterio",
+    "author": "Roma Zagordo",
+    "isbn": "978-3-16-148410-1",
+    "price": 30000,
+    "stock": 15,
+    "category": "Ficción"
+  },
+  {
+    "id": "1e2878b9-e40d-40b4-ab30-d4e53dc2314d",
+    "type": "book",
+    "title": "El Padrino",
+    "author": "Autor Renombrado",
+    "isbn": "978-3-16-148410-5",
+    "price": 35000,
+    "stock": 6,
+    "category": "Drama"
+  },
+  {
     "id": "240110df-6209-4909-ba04-3dbd0f7ab2ef",
     "type": "book",
     "title": "The Great Gatsby",
@@ -111,13 +129,5 @@
     "price": 15.99,
     "stock": 5,
     "category": "Novela"
-  },
-  {
-    "id": "13255eeb-91c2-45d0-b817-e2dbcaee4538",
-    "title": " (Edición Especial)",
-    "author": "Vladimir Nabokov",
-    "isbn": "978-3-16-148410-0",
-    "price": 15000,
-    "stock": 4
   }
 ]

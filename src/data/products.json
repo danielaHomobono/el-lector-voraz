@@ -111,5 +111,13 @@
     "price": 15.99,
     "stock": 5,
     "category": "Novela"
+  },
+  {
+    "id": "13255eeb-91c2-45d0-b817-e2dbcaee4538",
+    "title": " (Edición Especial)",
+    "author": "Vladimir Nabokov",
+    "isbn": "978-3-16-148410-0",
+    "price": 15000,
+    "stock": 4
   }
 ]

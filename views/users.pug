@@ -7,4 +7,6 @@ block content
       .user-card
         h2= user.email
         p Rol: #{user.role}
+        button(onclick=`editUser('${user.email}')`) Editar
+        button(onclick=`deleteUser('${user.email}')`) Eliminar
         hr

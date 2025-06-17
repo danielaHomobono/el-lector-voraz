@@ -1,4 +1,3 @@
-
 extends layout
 
 block content
@@ -10,4 +9,6 @@ block content
         p Precio: $#{cafe.price}
         p Stock: #{cafe.stock}
         p Categoría: #{cafe.category}
+        button(onclick=`editCafe('${cafe.id}')`) Editar
+        button(onclick=`deleteCafe('${cafe.id}')`) Eliminar
         hr

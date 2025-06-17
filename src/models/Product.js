@@ -1,24 +1,55 @@
-const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
-class Product {
-  constructor({ id, type, title, author, isbn, price, stock, category, consignment = false }) {
-    if (!title || !price || !stock || !category) throw new Error('Faltan campos requeridos');
-    if (type === 'book' && (!author || !isbn)) throw new Error('Autor e ISBN requeridos para libros');
-    this.id = id;
-    this.type = type; // "book" | "magazine"
-    this.title = title;
-    this.author = author;
-    this.isbn = isbn;
-    this.price = price;
-    this.stock = stock;
-    this.category = category;
-    this.consignment = consignment;
+const productSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: [true, 'El tipo es obligatorio'],
+    enum: ['book', 'magazine']
+  },
+  title: {
+    type: String,
+    required: [true, 'El título es obligatorio'],
+    trim: true
+  },
+  author: {
+    type: String,
+    required: [true, 'El autor es obligatorio'],
+    trim: true
+  },
+  isbn: {
+    type: String,
+    required: [true, 'El ISBN es obligatorio'],
+    unique: true,
+    trim: true
+  },
+  price: {
+    type: Number,
+    required: [true, 'El precio es obligatorio'],
+    min: [0, 'El precio no puede ser negativo']
+  },
+  stock: {
+    type: Number,
+    required: [true, 'El stock es obligatorio'],
+    min: [0, 'El stock no puede ser negativo'],
+    default: 0
+  },
+  category: {
+    type: String,
+    required: [true, 'La categoría es obligatoria'],
+    enum: ['Novela', 'Ficción', 'Clasicos', 'Drama', 'Relatos']
+  },
+  consignment: {
+    type: Boolean,
+    default: false
   }
+}, {
+  timestamps: true
+});
 
-  updateStock(quantity) {
-    if (this.stock < quantity) throw new Error('Stock insuficiente');
-    this.stock -= quantity;
-  }
-}
+// Índices para búsquedas más eficientes
+productSchema.index({ title: 'text', author: 'text' });
+productSchema.index({ type: 1, category: 1 });
+
+const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;

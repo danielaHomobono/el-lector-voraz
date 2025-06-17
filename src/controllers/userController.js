@@ -17,8 +17,8 @@
       if (!userData.email || !userData.password || !userData.role) {
         return res.status(400).json({ error: 'Email, contraseña y rol son requeridos' });
       }
-      if (!['admin', 'client'].includes(userData.role)) {
-        return res.status(400).json({ error: 'Rol debe ser "admin" o "client"' });
+      if (!['admin', 'client', 'staff'].includes(userData.role)) {
+        return res.status(400).json({ error: 'Rol debe ser "admin", "client" o "staff"' });
       }
       const newUser = await userService.createUser(userData);
       res.status(201).json(newUser);
@@ -34,8 +34,8 @@
       if (!userData.email || !userData.password || !userData.role) {
         return res.status(400).json({ error: 'Email, contraseña y rol son requeridos' });
       }
-      if (!['admin', 'client'].includes(userData.role)) {
-        return res.status(400).json({ error: 'Rol debe ser "admin" o "client"' });
+      if (!['admin', 'client', 'staff'].includes(userData.role)) {
+        return res.status(400).json({ error: 'Rol debe ser "admin", "client" o "staff"' });
       }
       const updatedUser = await userService.updateUser(id, userData);
       res.json(updatedUser);

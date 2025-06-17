@@ -21,6 +21,7 @@ block content
           p Cliente ID: #{sale.clientId}
         else
           p Sin cliente asociado
+        button(onclick=`viewSaleDetails('${sale.id}')`) Ver Detalles
         hr
     else
       p No hay ventas registradas.

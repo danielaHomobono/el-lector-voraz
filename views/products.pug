@@ -14,4 +14,5 @@ block content
           p Stock: #{product.stock}
           if product.category
             p Categoría: #{product.category}
+          button(onclick=`reserveBook('${product.isbn}')`) Reservar
           hr

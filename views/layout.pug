@@ -18,6 +18,12 @@ html(lang="es")
               li: a(href="/clients") Clientes
               li: a(href="/sales") Ventas
               li: a(href="/users") Usuarios
+              li: a(href="/financial") Reporte Financiero
+            else if user.role === 'staff'
+              li: a(href="/products") Catálogo de Libros
+              li: a(href="/inventory") Inventario
+              li: a(href="/cafes") Cafetería
+              li: a(href="/sales") Ventas
             else
               li: a(href="/products") Catálogo de Libros
               li: a(href="/cafes") Cafetería

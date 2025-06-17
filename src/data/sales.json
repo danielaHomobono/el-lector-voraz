@@ -1,57 +1,65 @@
 [
   {
     "id": "9e120c5a-9d4c-4298-857c-ffa60992b348",
-    "total": 59.98,
+    "total": 39.99,
     "channel": "online",
     "date": "2025-05-20T00:34:00.599Z",
     "clientId": null,
+    "status": "completed",
     "items": [
       {
-        "productId": "83bd7d39-9e97-4a52-a69d-798ddc02e403",
+        "productId": "978-0-06-112008-4",
         "type": "book",
-        "quantity": 1
+        "quantity": 1,
+        "price": 39.99
       }
     ]
   },
   {
     "id": "83bd7d39-9e97-4a52-a69d-798ddc02e403",
-    "total": 3000,
+    "total": 35.00,
     "channel": "store",
     "date": "2025-05-20T03:14:06.758Z",
     "clientId": null,
+    "status": "completed",
     "items": [
       {
         "productId": "e5a7438f-0897-4985-985c-b08396aed4bc",
-        "type": "book",
-        "quantity": 1
+        "type": "cafe",
+        "quantity": 1,
+        "price": 35.00
       }
     ]
   },
   {
     "id": "c1214f60-5a3e-4b2c-aaa1-e7b3dc69b76f",
-    "total": 3000,
+    "total": 35.00,
     "channel": "store",
     "date": "2025-05-20T03:23:04.426Z",
     "clientId": null,
+    "status": "completed",
     "items": [
       {
         "productId": "e5a7438f-0897-4985-985c-b08396aed4bc",
-        "type": "book",
-        "quantity": 1
+        "type": "cafe",
+        "quantity": 1,
+        "price": 35.00
       }
     ]
   },
   {
     "id": "5b2d71cc-213b-4b38-9cbd-5099e00f3deb",
-    "total": 59.98,
+    "total": 39.99,
     "channel": "online",
     "date": "2025-05-20T19:06:18.162Z",
-    "clientId": "id-del-cliente",
+    "clientId": "mica@gmail.com",
+    "status": "completed",
     "items": [
       {
-        "productId": "83bd7d39-9e97-4a52-a69d-798ddc02e403",
+        "productId": "978-0-06-112008-4",
         "type": "book",
-        "quantity": 1
+        "quantity": 1,
+        "price": 39.99
       }
     ]
   }

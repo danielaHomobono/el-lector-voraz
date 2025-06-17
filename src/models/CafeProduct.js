@@ -1,19 +1,48 @@
-const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
-class CafeProduct {
-  constructor({ id, name, price, stock, category }) {
-    if (!name || !price || !stock || !category) throw new Error('Faltan campos requeridos');
-    this.id = id;
-    this.name = name;
-    this.price = price;
-    this.stock = stock;
-    this.category = category;
+const cafeProductSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  name: {
+    type: String,
+    required: [true, 'El nombre es obligatorio'],
+    trim: true
+  },
+  price: {
+    type: Number,
+    required: [true, 'El precio es obligatorio'],
+    min: [0, 'El precio no puede ser negativo']
+  },
+  stock: {
+    type: Number,
+    required: [true, 'El stock es obligatorio'],
+    min: [0, 'El stock no puede ser negativo'],
+    default: 0
+  },
+  category: {
+    type: String,
+    required: [true, 'La categoría es obligatoria'],
+    enum: ['Bebida', 'Comida', 'Postre']
+  },
+  description: {
+    type: String,
+    trim: true
+  },
+  isAvailable: {
+    type: Boolean,
+    default: true
   }
+}, {
+  timestamps: true
+});
 
-  updateStock(quantity) {
-    if (this.stock < quantity) throw new Error('Stock insuficiente');
-    this.stock -= quantity;
-  }
-}
+// Índices para búsquedas más eficientes
+cafeProductSchema.index({ name: 'text' });
+cafeProductSchema.index({ category: 1 });
+
+const CafeProduct = mongoose.model('CafeProduct', cafeProductSchema);
 
 module.exports = CafeProduct;

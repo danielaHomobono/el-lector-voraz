@@ -1,23 +1,40 @@
+const mongoose = require('mongoose');
 
-const { v4: uuidv4 } = require('uuid');
-
-class Client {
-  constructor({ id, name, email, points = 0 }) {
-    if (!name || !email) throw new Error('Faltan campos requeridos');
-    this.id = id;
-    this.name = name;
-    this.email = email;
-    this.points = points;
+const clientSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'El nombre es obligatorio'],
+    trim: true
+  },
+  email: {
+    type: String,
+    required: [true, 'El email es obligatorio'],
+    unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Por favor ingrese un email válido']
+  },
+  points: {
+    type: Number,
+    default: 0,
+    min: [0, 'Los puntos no pueden ser negativos']
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
+}, {
+  timestamps: true
+});
 
-  addPoints(points) {
-    this.points += points;
-  }
+// Índices
+clientSchema.index({ email: 1 }, { unique: true });
+clientSchema.index({ name: 'text' });
 
-  redeemPoints(points) {
-    if (this.points < points) throw new Error('Puntos insuficientes');
-    this.points -= points;
-  }
-}
+const Client = mongoose.model('Client', clientSchema);
 
 module.exports = Client;

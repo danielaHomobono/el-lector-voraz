@@ -2,64 +2,82 @@
   {
     "id": "e5a7438f-0897-4985-985c-b08396aed4bc",
     "name": "Café Americano Doble",
-    "price": 3500,
+    "price": 35.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Café americano doble shot",
+    "isAvailable": true
   },
   {
     "id": "e2257617-e204-47dd-8757-3fe69cee6bf5",
     "name": "Latte",
-    "price": 4500,
+    "price": 45.00,
     "stock": 80,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Espresso con leche cremosa",
+    "isAvailable": true
   },
   {
     "id": "2e8e7b88-2e23-409b-ab18-a41634d03a2d",
     "name": "Capuccino",
-    "price": 3600,
+    "price": 36.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Espresso con leche y espuma",
+    "isAvailable": true
   },
   {
     "id": "3e4b7972-2ba8-4604-941f-42e35f1d2988",
     "name": "Matcha Te",
-    "price": 3800,
+    "price": 38.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Té verde matcha tradicional",
+    "isAvailable": true
   },
   {
     "id": "9afab4e8-c9cb-47ae-8517-0bb98c8ceddd",
     "name": "Exprimido de naranja",
-    "price": 4500,
+    "price": 45.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Jugo de naranja natural",
+    "isAvailable": true
   },
   {
     "id": "794d1730-5d26-458e-a104-6eeadf9d928f",
     "name": "Espresso",
-    "price": 3500,
+    "price": 35.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Café espresso puro",
+    "isAvailable": true
   },
   {
     "id": "881443ec-ea79-4033-8ffe-6990081e4ce0",
     "name": "Mocha",
-    "price": 3000,
+    "price": 30.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Espresso con chocolate y leche",
+    "isAvailable": true
   },
   {
     "id": "93fe8045-0825-4f3f-bbc7-48c044350d55",
     "name": "Macchiato",
-    "price": 3900,
+    "price": 39.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Espresso con un toque de leche",
+    "isAvailable": true
   },
   {
     "id": "9bfd6288-ebf6-4ea3-9593-4df0d021c368",
     "name": "Te Verde",
-    "price": 4200,
+    "price": 42.00,
     "stock": 50,
-    "category": "Bebida"
+    "category": "Bebida",
+    "description": "Té verde tradicional",
+    "isAvailable": true
   }
 ]

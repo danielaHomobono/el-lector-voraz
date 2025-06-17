@@ -1,4 +1,3 @@
-
 extends layout
 
 block content
@@ -10,4 +9,6 @@ block content
         p Email: #{client.email}
         if client.points
           p Puntos: #{client.points}
+        button(onclick=`editClient('${client.email}')`) Editar
+        button(onclick=`deleteClient('${client.email}')`) Eliminar
         hr

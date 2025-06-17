@@ -3,60 +3,80 @@
     "id": "1",
     "name": "Micaela Boniato",
     "email": "mica@gmail.com",
-    "points": 32
+    "points": 32,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "d6b82367-fae2-44a7-946d-fdc314517eb8",
     "name": "Juana Gramayo",
-    "email": "juaitag@hotmail.com",
-    "points": 0
+    "email": "juaitagrg@hotmail.com",
+    "points": 0,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "17252ef5-a181-4c2d-98c3-d4ba994e59f8",
     "name": "Juana Pery",
     "points": 10,
-    "email": "juanap@gmail.com"
+    "email": "juanap@gmail.com",
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "8cdb8256-991d-4790-82cd-d336c64fc764",
     "name": "Roma Zagordo",
     "email": "romizagordo@gmail.com",
-    "points": 0
+    "points": 0,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "0880c8ee-d1b6-4cd0-86dd-1b032c1535c1",
     "name": "Dani Homobono",
     "email": "dani@gmail.com",
-    "points": 0
+    "points": 0,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "e371e5b0-906b-419b-9e5a-8432d3dd90d9",
     "name": "Vero Hassen",
     "email": "vero@gmail.com",
-    "points": 0
+    "points": 0,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "4882cc04-6b8c-421a-94ae-4915613ad8a3",
     "name": "Juan Pérez",
     "email": "juan@lectorvoraz.com",
-    "points": 0
+    "points": 0,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "e9e96a30-89e5-40eb-ad91-4edc3e48e0f5",
     "name": "Ana López",
     "email": "ana@lectorvoraz.com",
+    "points": 0,
+    "isActive": true,
     "phone": "9876543210"
   },
   {
     "id": "3bde28f7-1613-48f0-9a73-7511ef2a90fe",
     "name": "Juan Pérez",
     "email": "juan@example.com",
-    "points": 100
+    "points": 100,
+    "isActive": true,
+    "phone": null
   },
   {
     "id": "8bc511ac-1cf6-4a21-8dfc-d3a8fa757171",
     "name": "Lola Gramayo",
     "email": "juaitag@hotmail.com",
-    "points": 0
+    "points": 0,
+    "isActive": true,
+    "phone": null
   }
 ]

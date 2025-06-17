@@ -81,6 +81,7 @@ block content
             th ISBN
             th Precio
             th Stock
+            th Acciones
           each product in products
             tr
               td= product.title
@@ -88,6 +89,9 @@ block content
               td= product.isbn
               td= product.price
               td= product.stock
+              td
+                button(onclick=`editBook('${product.isbn}')`) Editar
+                button(onclick=`deleteBook('${product.isbn}')`) Eliminar
       else
         p No hay libros en inventario.
 

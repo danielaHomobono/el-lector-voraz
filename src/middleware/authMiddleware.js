@@ -14,6 +14,13 @@ const restrictToAdmin = (req, res, next) => {
   next();
 };
 
+const restrictToStaff = (req, res, next) => {
+  if (!req.session.user || !['admin', 'staff'].includes(req.session.user.role)) {
+    return res.status(403).json({ error: 'Acceso denegado: Solo personal autorizado' });
+  }
+  next();
+};
+
 // Middleware para proteger rutas web
 const requireAuth = (req, res, next) => {
   if (!req.session.user) {
@@ -34,9 +41,22 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Middleware para proteger rutas web de staff
+const requireStaff = (req, res, next) => {
+  if (!req.session.user || !['admin', 'staff'].includes(req.session.user.role)) {
+    return res.status(403).render('error', { 
+      title: 'Acceso Denegado',
+      message: 'Solo el personal autorizado puede acceder a esta página'
+    });
+  }
+  next();
+};
+
 module.exports = { 
   verifyApiKey, 
   restrictToAdmin, 
+  restrictToStaff, 
   requireAuth, 
-  requireAdmin 
+  requireAdmin, 
+  requireStaff 
 };

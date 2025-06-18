@@ -58,8 +58,8 @@ block content
 
             if (response.ok) {
               alert('Libro agregado exitosamente');
-              window.location.reload(); // Recargar la página para ver el nuevo libro
               document.getElementById('addBookForm').reset(); // Limpiar el formulario
+              window.location.reload(); // Recargar la página para ver el nuevo libro
             } else {
               const data = await response.json();
               alert('Error: ' + (data.error || 'Error al agregar el libro'));
@@ -73,6 +73,7 @@ block content
   .inventory-container
     .inventory-section
       h2 Libros
+      p Debug: #{products ? products.length : 'No hay productos'} libros encontrados
       if products && products.length > 0
         table(border='1')
           tr

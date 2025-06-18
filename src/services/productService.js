@@ -1,105 +1,105 @@
 // src/services/productService.js
-  const fileService = require('./fileService');
-  const { generateUUID } = require('../utils/uuid');
+const Product = require('../models/Product');
+const CafeProduct = require('../models/CafeProduct');
+const { generateUUID } = require('../utils/uuid');
 
-  async function getProducts() {
-    const books = await fileService.readFile('src/data/products.json');
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
+async function getProducts() {
+  try {
+    const books = await Product.find({ type: 'book' });
+    const cafes = await CafeProduct.find();
     return [...books, ...cafes];
+  } catch (error) {
+    throw new Error('Error al obtener productos: ' + error.message);
   }
+}
 
-  async function createProduct(productData) {
+async function createProduct(productData) {
+  try {
     if (productData.type === 'cafe') {
-      const cafes = await fileService.readFile('src/data/cafe_products.json');
-      const newCafe = {
-        id: generateUUID(),
+      const newCafe = new CafeProduct({
+        id: productData.id || generateUUID(),
         name: productData.name,
         price: productData.price,
         stock: productData.stock,
-        category: productData.category || 'Bebida'
-      };
-      cafes.push(newCafe);
-      await fileService.writeFile('src/data/cafe_products.json', cafes);
-      return newCafe;
+        category: productData.category || 'Bebida',
+        description: productData.description || '',
+        isAvailable: true
+      });
+      return await newCafe.save();
     } else {
-      const books = await fileService.readFile('src/data/products.json');
-      const newBook = {
-        id: generateUUID(),
+      console.log('Creando libro con datos:', productData);
+      const newBook = new Product({
         title: productData.title,
         author: productData.author,
         isbn: productData.isbn,
         price: productData.price,
         stock: productData.stock,
         type: 'book',
-        category: productData.category
-      };
-      books.push(newBook);
-      await fileService.writeFile('src/data/products.json', books);
-      return newBook;
+        category: productData.category,
+        consignment: productData.consignment || false
+      });
+      const savedBook = await newBook.save();
+      console.log('Libro guardado exitosamente:', savedBook);
+      return savedBook;
     }
+  } catch (error) {
+    console.error('Error al crear producto:', error);
+    throw new Error('Error al crear producto: ' + error.message);
   }
+}
 
-  async function updateProduct(id, productData) {
+async function updateProduct(id, productData) {
+  try {
     // Primero intentamos actualizar en libros
-    const books = await fileService.readFile('src/data/products.json');
-    const bookIndex = books.findIndex(p => p.id === id);
+    let product = await Product.findOne({ isbn: id });
     
-    if (bookIndex !== -1) {
-      books[bookIndex] = {
-        id,
-        title: productData.title,
-        author: productData.author,
-        isbn: productData.isbn,
-        price: productData.price,
-        stock: productData.stock,
-        type: 'book',
-        category: productData.category
-      };
-      await fileService.writeFile('src/data/products.json', books);
-      return books[bookIndex];
+    if (product) {
+      product.title = productData.title;
+      product.author = productData.author;
+      product.isbn = productData.isbn;
+      product.price = productData.price;
+      product.stock = productData.stock;
+      product.category = productData.category;
+      return await product.save();
     }
 
     // Si no está en libros, intentamos en cafés
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
-    const cafeIndex = cafes.findIndex(p => p.id === id);
+    product = await CafeProduct.findOne({ id: id });
     
-    if (cafeIndex !== -1) {
-      cafes[cafeIndex] = {
-        id,
-        name: productData.name,
-        price: productData.price,
-        stock: productData.stock,
-        category: productData.category || 'Bebida'
-      };
-      await fileService.writeFile('src/data/cafe_products.json', cafes);
-      return cafes[cafeIndex];
+    if (product) {
+      product.name = productData.name;
+      product.price = productData.price;
+      product.stock = productData.stock;
+      product.category = productData.category;
+      return await product.save();
     }
 
     throw new Error('Producto no encontrado');
+  } catch (error) {
+    throw new Error('Error al actualizar producto: ' + error.message);
   }
+}
 
-  async function deleteProduct(id) {
+async function deleteProduct(id) {
+  try {
     // Intentamos eliminar de libros
-    const books = await fileService.readFile('src/data/products.json');
-    const bookIndex = books.findIndex(p => p.id === id);
+    let product = await Product.findOneAndDelete({ isbn: id });
     
-    if (bookIndex !== -1) {
-      books.splice(bookIndex, 1);
-      await fileService.writeFile('src/data/products.json', books);
+    if (product) {
       return;
     }
 
     // Si no está en libros, intentamos en cafés
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
-    const cafeIndex = cafes.findIndex(p => p.id === id);
+    product = await CafeProduct.findOneAndDelete({ id: id });
     
-    if (cafeIndex !== -1) {
-      cafes.splice(cafeIndex, 1);
-      await fileService.writeFile('src/data/cafe_products.json', cafes);
+    if (product) {
       return;
     }
 
     throw new Error('Producto no encontrado');
+  } catch (error) {
+    throw new Error('Error al eliminar producto: ' + error.message);
   }
+}
 
-  module.exports = { getProducts, createProduct, updateProduct, deleteProduct };
+module.exports = { getProducts, createProduct, updateProduct, deleteProduct };

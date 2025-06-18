@@ -1,6 +1,9 @@
 // server.js
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const passport = require('./src/config/passport');
+const connectDB = require('./src/config/database');
 const productRoutes = require('./src/routes/productRoutes');
 const cafeRoutes = require('./src/routes/cafeRoutes');
 const userRoutes = require('./src/routes/userRoutes');
@@ -14,9 +17,11 @@ const fileService = require('./src/services/fileService');
 const path = require('path');
 const fs = require('fs');
 const webRoutes = require('./src/routes/webRoutes');
-require('dotenv').config();
 
 const app = express();
+
+// Conectar a MongoDB
+connectDB();
 
 // Configuración de vistas
 app.set('view engine', 'pug');
@@ -36,6 +41,10 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
+
+// Configurar Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Middleware para pasar el usuario a todas las vistas
 app.use((req, res, next) => {
@@ -75,8 +84,13 @@ app.get('/login', (req, res) => {
 app.get('/inventory', async (req, res) => {
   try {
     console.log('Renderizando inventory.pug');
-    const products = await fileService.readFile('src/data/products.json');
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    const Product = require('./src/models/Product');
+    const CafeProduct = require('./src/models/CafeProduct');
+    const products = await Product.find();
+    const cafes = await CafeProduct.find();
+    console.log('Productos encontrados en MongoDB:', products.length);
+    console.log('Cafés encontrados en MongoDB:', cafes.length);
+    console.log('Productos:', products.map(p => ({ title: p.title, type: p.type })));
     res.render('inventory', { title: 'Inventario', products, cafes, user: req.session.user });
   } catch (error) {
     console.error('Error en /inventory:', error);
@@ -90,7 +104,8 @@ app.get('/products', async (req, res) => {
     if (!fs.existsSync(path.join(__dirname, 'views/products.pug'))) {
       throw new Error('products.pug no encontrado en views/');
     }
-    const products = await fileService.readFile('src/data/products.json');
+    const Product = require('./src/models/Product');
+    const products = await Product.find({ type: 'book' });
     res.render('products', { title: 'Catálogo de Libros', products, user: req.session.user });
   } catch (error) {
     console.error('Error en /products:', error);
@@ -101,7 +116,8 @@ app.get('/products', async (req, res) => {
 app.get('/cafes', async (req, res) => {
   try {
     console.log('Renderizando cafes.pug');
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    const CafeProduct = require('./src/models/CafeProduct');
+    const cafes = await CafeProduct.find();
     res.render('cafes', { title: 'Cafetería', cafes, user: req.session.user });
   } catch (error) {
     console.error('Error en /cafes:', error);

@@ -91,7 +91,7 @@ app.get('/inventory', async (req, res) => {
     console.log('Productos encontrados en MongoDB:', products.length);
     console.log('Cafés encontrados en MongoDB:', cafes.length);
     console.log('Productos:', products.map(p => ({ title: p.title, type: p.type })));
-    res.render('inventory', { title: 'Inventario', products, cafes, user: req.session.user });
+    res.render('inventory', { title: 'Inventario', products, cafes, user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /inventory:', error);
     res.status(500).send(`Error al cargar inventario: ${error.message}`);
@@ -128,8 +128,9 @@ app.get('/cafes', async (req, res) => {
 app.get('/clients', async (req, res) => {
   try {
     console.log('Renderizando clients.pug');
-    const clients = await fileService.readFile('src/data/clients.json');
-    res.render('clients', { title: 'Clientes', clients, user: req.session.user });
+    const Client = require('./src/models/Client');
+    const clients = await Client.find();
+    res.render('clients', { title: 'Clientes', clients, user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /clients:', error);
     res.status(500).send(`Error al cargar clientes: ${error.message}`);
@@ -150,8 +151,9 @@ app.get('/sales', async (req, res) => {
 app.get('/users', async (req, res) => {
   try {
     console.log('Renderizando users.pug');
-    const users = await fileService.readFile('src/data/users.json');
-    res.render('users', { title: 'Usuarios', users, user: req.session.user });
+    const User = require('./src/models/User');
+    const users = await User.find();
+    res.render('users', { title: 'Usuarios', users, user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /users:', error);
     res.status(500).send(`Error al cargar usuarios: ${error.message}`);

@@ -1,14 +1,271 @@
 extends layout
 
 block content
-  h1 Lista de Clientes
+  h1 Gestión de Clientes
+  
+  if user && user.role === 'admin'
+    .add-client-form
+      h2 Agregar Nuevo Cliente
+      form#addClientForm(action="/api/clients" method="POST")
+        .form-group
+          label(for="clientName") Nombre:
+          input#clientName(type="text" name="name" required)
+
+        .form-group
+          label(for="clientEmail") Email:
+          input#clientEmail(type="email" name="email" required)
+
+        .form-group
+          label(for="clientPhone") Teléfono:
+          input#clientPhone(type="tel" name="phone")
+
+        .form-group
+          label(for="clientPoints") Puntos:
+          input#clientPoints(type="number" name="points" value="0" min="0")
+
+        button(type="submit") Agregar Cliente
+
+      script.
+        document.getElementById('addClientForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const formData = {
+            name: document.getElementById('clientName').value,
+            email: document.getElementById('clientEmail').value,
+            phone: document.getElementById('clientPhone').value || null,
+            points: parseInt(document.getElementById('clientPoints').value) || 0
+          };
+
+          try {
+            const response = await fetch('/api/clients', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-voraz-key': API_KEY
+              },
+              body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+              alert('Cliente agregado exitosamente');
+              document.getElementById('addClientForm').reset();
+              window.location.reload();
+            } else {
+              const data = await response.json();
+              alert('Error: ' + (data.error || 'Error al agregar el cliente'));
+            }
+          } catch (error) {
+            alert('Error al agregar el cliente');
+          }
+        });
+
   .clients-container
-    each client in clients
-      .client-card
-        h2= client.name
-        p Email: #{client.email}
-        if client.points
-          p Puntos: #{client.points}
-        button(onclick=`editClient('${client.email}')`) Editar
-        button(onclick=`deleteClient('${client.email}')`) Eliminar
-        hr
+    h2 Clientes Registrados
+    if clients && clients.length > 0
+      table(border='1')
+        tr
+          th Nombre
+          th Email
+          th Teléfono
+          th Puntos
+          th Fecha de Registro
+          th Acciones
+        each client in clients
+          tr
+            td= client.name
+            td= client.email
+            td= client.phone || 'No especificado'
+            td= client.points || 0
+            td= client.createdAt ? new Date(client.createdAt).toLocaleDateString() : 'N/A'
+            td
+              button(onclick=`editClient('${client.id}')`) Editar
+              button(onclick=`deleteClient('${client.id}')`) Eliminar
+    else
+      p No hay clientes registrados.
+
+  style.
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f7f7fa;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 2rem;
+      color: #2c3e50;
+    }
+    .add-client-form {
+      max-width: 600px;
+      min-width: 300px;
+      width: 100vw;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      padding: 2rem;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      box-sizing: border-box;
+    }
+    .add-client-form h2 {
+      margin-top: 0;
+      color: #bfa76a;
+      text-align: center;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .add-client-form button {
+      background: #bfa76a !important;
+      color: #fff !important;
+      width: 100%;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      display: block;
+      border: none;
+      box-sizing: border-box;
+      padding: 0.6rem 1.2rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .add-client-form button:hover {
+      background: #a68b4a !important;
+    }
+    .clients-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    .clients-container h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 2rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      overflow: hidden;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eaeaea;
+    }
+    th {
+      background: #eaf1fb;
+      color: #bfa76a;
+      font-weight: 600;
+    }
+    button {
+      background: #bfa76a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      transition: background 0.2s;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #a68b4a;
+    }
+    main {
+      margin-bottom: 6rem;
+    }
+    @media (max-width: 768px) {
+      .add-client-form {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      table {
+        font-size: 0.9rem;
+      }
+      th, td {
+        padding: 0.5rem;
+      }
+    }
+
+  script.
+    // La API key se pasa desde el backend como variable global
+    const API_KEY = !{JSON.stringify(apiKey)};
+
+    // --------- CLIENTES ---------
+    async function deleteClient(id) {
+      if (!confirm('¿Seguro que quieres eliminar este cliente?')) return;
+      try {
+        const response = await fetch(`/api/clients/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-voraz-key': API_KEY
+          }
+        });
+        if (response.ok) {
+          alert('Cliente eliminado exitosamente');
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'No se pudo eliminar el cliente'));
+        }
+      } catch (error) {
+        alert('Error al eliminar el cliente');
+      }
+    }
+
+    async function editClient(id) {
+      const nuevoNombre = prompt('Nuevo nombre:');
+      const nuevoEmail = prompt('Nuevo email:');
+      const nuevoTelefono = prompt('Nuevo teléfono:');
+      const nuevosPuntos = prompt('Nuevos puntos:');
+      
+      if (nuevoNombre === null || nuevoEmail === null) return;
+      
+      try {
+        const response = await fetch(`/api/clients/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-voraz-key': API_KEY
+          },
+          body: JSON.stringify({
+            name: nuevoNombre,
+            email: nuevoEmail,
+            phone: nuevoTelefono || null,
+            points: parseInt(nuevosPuntos) || 0
+          })
+        });
+        if (response.ok) {
+          alert('Cliente actualizado exitosamente');
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'No se pudo actualizar el cliente'));
+        }
+      } catch (error) {
+        alert('Error al actualizar el cliente');
+      }
+    }

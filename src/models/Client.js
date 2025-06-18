@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const clientSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name: {
     type: String,
     required: [true, 'El nombre es obligatorio'],
@@ -32,6 +37,7 @@ const clientSchema = new mongoose.Schema({
 });
 
 // Índices
+clientSchema.index({ id: 1 }, { unique: true });
 clientSchema.index({ email: 1 }, { unique: true });
 clientSchema.index({ name: 'text' });
 

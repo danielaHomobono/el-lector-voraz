@@ -1,48 +1,41 @@
 // src/services/clientService.js
-  const fileService = require('./fileService');
-  const { generateUUID } = require('../utils/uuid');
+const Client = require('../models/Client');
+const { generateUUID } = require('../utils/uuid');
 
-  async function getClients() {
-    return await fileService.readFile('src/data/clients.json');
-  }
+async function getClients() {
+  return await Client.find();
+}
 
-  async function createClient(clientData) {
-    const clients = await getClients();
-    const newClient = {
-      id: generateUUID(),
+async function createClient(clientData) {
+  const newClient = new Client({
+    id: generateUUID(),
+    name: clientData.name,
+    email: clientData.email,
+    points: clientData.points || 0,
+    phone: clientData.phone || null
+  });
+  return await newClient.save();
+}
+
+async function updateClient(id, clientData) {
+  const updatedClient = await Client.findOneAndUpdate(
+    { id },
+    {
       name: clientData.name,
       email: clientData.email,
-      points: clientData.points
-    };
-    clients.push(newClient);
-    await fileService.writeFile('src/data/clients.json', clients);
-    return newClient;
-  }
+      points: clientData.points || 0,
+      phone: clientData.phone || null
+    },
+    { new: true }
+  );
+  if (!updatedClient) throw new Error('Cliente no encontrado');
+  return updatedClient;
+}
 
-  async function updateClient(id, clientData) {
-    const clients = await getClients();
-    const index = clients.findIndex(c => c.id === id);
-    if (index === -1) {
-      throw new Error('Cliente no encontrado');
-    }
-    clients[index] = {
-      id,
-      name: clientData.name,
-      email: clientData.email,
-      points: clientData.points
-    };
-    await fileService.writeFile('src/data/clients.json', clients);
-    return clients[index];
-  }
+async function deleteClient(id) {
+  const deleted = await Client.findOneAndDelete({ id });
+  if (!deleted) throw new Error('Cliente no encontrado');
+  return deleted;
+}
 
-  async function deleteClient(id) {
-    const clients = await getClients();
-    const index = clients.findIndex(c => c.id === id);
-    if (index === -1) {
-      throw new Error('Cliente no encontrado');
-    }
-    clients.splice(index, 1);
-    await fileService.writeFile('src/data/clients.json', clients);
-  }
-
-  module.exports = { getClients, createClient, updateClient, deleteClient };
+module.exports = { getClients, createClient, updateClient, deleteClient };

@@ -41,8 +41,13 @@ block content
           const data = await response.json();
 
           if (response.ok) {
-            // Login exitoso, redirigir al inicio
-            window.location.href = '/';
+            if (data.user.role === 'admin') {
+              window.location.href = '/inventory';
+            } else if (data.user.role === 'staff') {
+              window.location.href = '/inventory';
+            } else {
+              window.location.href = '/products';
+            }
           } else {
             // Mostrar error
             const errorDiv = document.createElement('div');

@@ -35,7 +35,7 @@ async function createUser(userData) {
       id: generateUUID(),
       email: userData.email,
       password: userData.password, // El modelo se encarga de hashearla
-      role: userData.role || 'user',
+      role: userData.role || 'client',
       isActive: true
     });
     return await newUser.save();

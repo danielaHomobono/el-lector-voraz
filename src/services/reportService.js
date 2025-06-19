@@ -1,20 +1,27 @@
 // src/services/reportService.js
-const fileService = require('./fileService');
+const Sale = require('../models/Sale');
 
 async function generateSalesReport({ startDate, endDate, groupBy = 'day' } = {}) {
   try {
-    const sales = await fileService.readFile('src/data/sales.json');
+    // Leer ventas desde MongoDB
+    let query = {};
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate + 'T23:59:59');
+    }
+    const sales = await Sale.find(query);
     
     // Validar que sales sea un array
     if (!Array.isArray(sales)) {
-      throw new Error('El archivo de ventas no contiene un array válido');
+      throw new Error('La consulta de ventas no devolvió un array válido');
     }
 
     // Filtrar ventas por fecha si se especifican
     let filteredSales = sales;
     if (startDate || endDate) {
       filteredSales = sales.filter(sale => {
-        const saleDate = new Date(sale.date);
+        const saleDate = new Date(sale.createdAt);
         if (startDate && saleDate < new Date(startDate)) return false;
         if (endDate && saleDate > new Date(endDate + 'T23:59:59')) return false;
         return true;
@@ -24,7 +31,7 @@ async function generateSalesReport({ startDate, endDate, groupBy = 'day' } = {})
     const report = filteredSales.reduce((acc, sale) => {
       // Determinar la clave de agrupación según el parámetro groupBy
       let groupKey;
-      const saleDate = new Date(sale.date);
+      const saleDate = new Date(sale.createdAt);
       
       switch (groupBy) {
         case 'week':
@@ -37,7 +44,8 @@ async function generateSalesReport({ startDate, endDate, groupBy = 'day' } = {})
           groupKey = saleDate.toISOString().slice(0, 7); // YYYY-MM
           break;
         default: // 'day'
-          groupKey = sale.date.split('T')[0];
+          const dateStr = sale.createdAt.toISOString();
+          groupKey = dateStr.split('T')[0];
       }
       
       if (!acc[groupKey]) {
@@ -84,6 +92,10 @@ async function generateSalesReport({ startDate, endDate, groupBy = 'day' } = {})
         ...data
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // LOG para depuración
+    console.log('Ventas filtradas:', filteredSales.map(s => s.createdAt));
+    console.log('Reporte agrupado:', sortedReport);
 
     // Calcular métricas generales
     const summary = {

@@ -23,7 +23,7 @@ block content
       // Reporte Diario
       .daily-report-section
         h2 Reporte Diario
-        if report.dailyReport && report.dailyReport.length > 0
+        if report.report && report.report.length > 0
           table.report-table
             thead
               tr
@@ -33,7 +33,7 @@ block content
                 th Canales
                 th Tipos de Producto
             tbody
-              each day in report.dailyReport
+              each day in report.report
                 tr
                   td= day.date
                   td= day.totalSales

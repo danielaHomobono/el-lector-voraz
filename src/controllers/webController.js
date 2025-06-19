@@ -36,7 +36,8 @@ async function productsPage(req, res) {
 
 async function cafesPage(req, res) {
   try {
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    const CafeProduct = require('../models/CafeProduct');
+    const cafes = await CafeProduct.find().sort({ createdAt: -1 });
     res.render('cafes', { 
       title: 'Cafetería',
       cafes,
@@ -49,8 +50,10 @@ async function cafesPage(req, res) {
 
 async function inventoryPage(req, res) {
   try {
+    const productService = require('../services/productService');
+    const CafeProduct = require('../models/CafeProduct');
     const products = await productService.getProducts();
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
+    const cafes = await CafeProduct.find().sort({ createdAt: -1 });
     res.render('inventory', { 
       title: 'Inventario',
       products,
@@ -64,7 +67,8 @@ async function inventoryPage(req, res) {
 
 async function clientsPage(req, res) {
   try {
-    const clients = await fileService.readFile('src/data/clients.json');
+    const Client = require('../models/Client');
+    const clients = await Client.find().sort({ createdAt: -1 });
     res.render('clients', { 
       title: 'Clientes',
       clients,
@@ -90,7 +94,8 @@ async function salesPage(req, res) {
 
 async function usersPage(req, res) {
   try {
-    const users = await fileService.readFile('src/data/users.json');
+    const User = require('../models/User');
+    const users = await User.find().sort({ createdAt: -1 });
     res.render('users', { 
       title: 'Usuarios',
       users,
@@ -101,6 +106,14 @@ async function usersPage(req, res) {
   }
 }
 
+async function cartPage(req, res) {
+  res.render('cart', { title: 'Carrito', user: req.session.user });
+}
+
+async function checkoutPage(req, res) {
+  res.render('checkout', { title: 'Finalizar Compra', user: req.session.user, apiKey: process.env.API_KEY });
+}
+
 module.exports = {
   loginPage,
   homePage,
@@ -109,5 +122,7 @@ module.exports = {
   inventoryPage,
   clientsPage,
   salesPage,
-  usersPage
+  usersPage,
+  cartPage,
+  checkoutPage
 };

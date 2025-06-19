@@ -140,7 +140,8 @@ app.get('/clients', async (req, res) => {
 app.get('/sales', async (req, res) => {
   try {
     console.log('Renderizando sales.pug');
-    const sales = await fileService.readFile('src/data/sales.json');
+    const Sale = require('./src/models/Sale');
+    const sales = await Sale.find().sort({ createdAt: -1 });
     res.render('sales', { title: 'Ventas', sales, user: req.session.user });
   } catch (error) {
     console.error('Error en /sales:', error);

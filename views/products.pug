@@ -14,5 +14,23 @@ block content
           p Stock: #{product.stock}
           if product.category
             p Categoría: #{product.category}
-          button(onclick=`reserveBook('${product.isbn}')`) Reservar
+          button(type="button" class="add-to-cart" data-id=product._id data-title=product.title data-price=product.price) Agregar al carrito
           hr
+
+  script.
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const title = this.getAttribute('data-title');
+        const price = parseFloat(this.getAttribute('data-price'));
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existing = cart.find(item => item.productId === id);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          cart.push({ productId: id, title, price, quantity: 1 });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        alert('Libro agregado al carrito: ' + title);
+      });
+    });

@@ -1,0 +1,57 @@
+extends layout
+
+block content
+  h1 Finalizar Compra
+  if !user || user.role !== 'client'
+    p Debes iniciar sesión como cliente para finalizar la compra.
+  else
+    form#checkoutForm(action='/api/ventas' method='POST')
+      .form-group
+        label(for='name') Nombre:
+        input#name(type='text' name='name' required)
+      .form-group
+        label(for='email') Email:
+        input#email(type='email' name='email' required value=user.email)
+      .form-group
+        label(for='address') Dirección:
+        input#address(type='text' name='address' required)
+      button(type='submit') Confirmar compra
+    script.
+      // La API key se pasa desde el backend como variable global
+      const API_KEY = !{JSON.stringify(apiKey)};
+      document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        // Leer carrito de localStorage
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        if (!cart.length) {
+          alert('El carrito está vacío.');
+          return;
+        }
+        // Obtener datos del formulario
+        const formData = {
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          address: document.getElementById('address').value,
+          products: cart
+        };
+        try {
+          const response = await fetch('/api/ventas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-voraz-key': API_KEY
+            },
+            body: JSON.stringify(formData)
+          });
+          if (response.ok) {
+            alert('¡Compra confirmada!');
+            localStorage.removeItem('cart');
+            window.location.href = '/products';
+          } else {
+            const data = await response.json();
+            alert('Error: ' + (data.error || 'No se pudo registrar la venta'));
+          }
+        } catch (error) {
+          alert('Error al registrar la venta');
+        }
+      }); 

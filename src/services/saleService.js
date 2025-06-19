@@ -1,64 +1,42 @@
 // src/services/saleService.js
-  const fileService = require('./fileService');
-  const { generateUUID } = require('../utils/uuid');
+const Sale = require('../models/Sale');
 
-  async function getSales() {
-    return await fileService.readFile('src/data/sales.json');
+async function getSales() {
+  return await Sale.find().sort({ createdAt: -1 });
+}
+
+async function createSale(saleData) {
+  // saleData: { name, email, address, products: [{productId, title, isbn, price, quantity}] }
+  if (!saleData.products || !Array.isArray(saleData.products) || saleData.products.length === 0) {
+    throw new Error('No se enviaron productos para la venta');
   }
+  // Calcular total
+  const total = saleData.products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Mapear productos a items del modelo
+  const items = saleData.products.map(item => ({
+    productId: item.productId || item.isbn, // Ajustar según cómo se guarde el producto
+    type: 'book',
+    quantity: item.quantity,
+    price: item.price
+  }));
+  // Crear venta
+  const newSale = new Sale({
+    total,
+    channel: 'online',
+    clientId: null, // Si tienes el id del cliente, ponlo aquí
+    items,
+    status: 'completed'
+  });
+  await newSale.save();
+  return newSale;
+}
 
-  async function createSale(saleData) {
-    const sales = await getSales();
-    const products = await fileService.readFile('src/data/products.json');
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
-    const productExists = products.some(p => p.id === saleData.productId) || cafes.some(c => c.id === saleData.productId);
-    if (!productExists) {
-      throw new Error('Producto no encontrado');
-    }
-    const newSale = {
-      id: generateUUID(),
-      productId: saleData.productId,
-      quantity: saleData.quantity,
-      totalPrice: saleData.totalPrice,
-      date: new Date().toISOString(),
-      clientId: saleData.clientId || null
-    };
-    sales.push(newSale);
-    await fileService.writeFile('src/data/sales.json', sales);
-    return newSale;
-  }
+async function updateSale(id, saleData) {
+  // ... (puedes adaptar si lo necesitas)
+}
 
-  async function updateSale(id, saleData) {
-    const sales = await getSales();
-    const products = await fileService.readFile('src/data/products.json');
-    const cafes = await fileService.readFile('src/data/cafe_products.json');
-    const productExists = products.some(p => p.id === saleData.productId) || cafes.some(c => c.id === saleData.productId);
-    if (!productExists) {
-      throw new Error('Producto no encontrado');
-    }
-    const index = sales.findIndex(s => s.id === id);
-    if (index === -1) {
-      throw new Error('Venta no encontrada');
-    }
-    sales[index] = {
-      id,
-      productId: saleData.productId,
-      quantity: saleData.quantity,
-      totalPrice: saleData.totalPrice,
-      date: sales[index].date,
-      clientId: saleData.clientId || null
-    };
-    await fileService.writeFile('src/data/sales.json', sales);
-    return sales[index];
-  }
+async function deleteSale(id) {
+  await Sale.findByIdAndDelete(id);
+}
 
-  async function deleteSale(id) {
-    const sales = await getSales();
-    const index = sales.findIndex(s => s.id === id);
-    if (index === -1) {
-      throw new Error('Venta no encontrada');
-    }
-    sales.splice(index, 1);
-    await fileService.writeFile('src/data/sales.json', sales);
-  }
-
-  module.exports = { getSales, createSale, updateSale, deleteSale };
+module.exports = { getSales, createSale, updateSale, deleteSale };

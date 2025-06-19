@@ -24,6 +24,9 @@ html(lang="es")
               li: a(href="/inventory") Inventario
               li: a(href="/cafes") Cafetería
               li: a(href="/sales") Ventas
+            else if user.role === 'client'
+              li: a(href="/products") Catálogo de Libros
+              li: a(href="/cart") Carrito
             else
               li: a(href="/products") Catálogo de Libros
               li: a(href="/cafes") Cafetería

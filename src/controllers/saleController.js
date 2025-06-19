@@ -14,8 +14,8 @@
   async function createSale(req, res) {
     try {
       const saleData = req.body;
-      if (!saleData.productId || !saleData.quantity || !saleData.totalPrice) {
-        return res.status(400).json({ error: 'ID del producto, cantidad y precio total son requeridos' });
+      if (!saleData.products || !Array.isArray(saleData.products) || saleData.products.length === 0) {
+        return res.status(400).json({ error: 'Debes enviar al menos un producto para la venta' });
       }
       const newSale = await saleService.createSale(saleData);
       res.status(201).json(newSale);

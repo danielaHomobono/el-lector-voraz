@@ -1,0 +1,65 @@
+extends layout
+
+block content
+  h1 Carrito de Compras
+  if !user || user.role !== 'client'
+    p Debes iniciar sesión como cliente para ver el carrito.
+  else
+    .cart-container
+      table#cartTable(border='1')
+        thead
+          tr
+            th Título
+            th Cantidad
+            th Precio
+            th Subtotal
+            th Acciones
+        tbody
+          // Aquí se llenará con JS
+      h2#cartTotal Total: $0
+      button#goCheckout(type='button') Finalizar compra
+  script.
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const tbody = document.querySelector('#cartTable tbody');
+      tbody.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, idx) => {
+        const subtotal = item.price * item.quantity;
+        total += subtotal;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.title}</td>
+          <td><input type='number' min='1' value='${item.quantity}' data-idx='${idx}' class='qty-input' style='width:50px;'></td>
+          <td>$${item.price.toFixed(2)}</td>
+          <td>$${subtotal.toFixed(2)}</td>
+          <td><button type='button' class='remove-btn' data-idx='${idx}'>Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('cartTotal').textContent = 'Total: $' + total.toFixed(2);
+      // Listeners para eliminar
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.onclick = function() {
+          const idx = parseInt(this.getAttribute('data-idx'));
+          cart.splice(idx, 1);
+          localStorage.setItem('cart', JSON.stringify(cart));
+          renderCart();
+        };
+      });
+      // Listeners para cambiar cantidad
+      document.querySelectorAll('.qty-input').forEach(input => {
+        input.onchange = function() {
+          const idx = parseInt(this.getAttribute('data-idx'));
+          let val = parseInt(this.value);
+          if (val < 1) val = 1;
+          cart[idx].quantity = val;
+          localStorage.setItem('cart', JSON.stringify(cart));
+          renderCart();
+        };
+      });
+    }
+    renderCart();
+    document.getElementById('goCheckout').onclick = function() {
+      window.location.href = '/checkout';
+    }; 

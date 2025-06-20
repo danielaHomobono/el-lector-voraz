@@ -27,10 +27,11 @@ block content
             span.label Categoría: 
             span #{cafe.category}
           p.book-price $#{cafe.price}
-          p.book-stock(class=cafe.stock > 5 ? 'in-stock' : 'low-stock') 
+          - const isLowStock = cafe.stock <= (cafe.lowStockThreshold || 5)
+          p.book-stock(class=isLowStock ? 'low-stock' : 'in-stock') 
             span.label Stock: 
-            span #{cafe.stock} 
-            span.stock-label= cafe.stock > 5 ? ' (Disponible)' : ' (Pocas unidades)'
+            span #{cafe.stock} #{cafe.stockUnit || 'unidades'}
+            span.stock-label= isLowStock ? ' (Pocas unidades)' : ' (Disponible)'
           button(
             type="button" 
             class="add-to-cart" 
@@ -38,7 +39,8 @@ block content
             data-title=cafe.name 
             data-price=cafe.price
             aria-label=`Agregar ${cafe.name} al carrito`
-          ) Agregar al carrito
+            disabled=cafe.stock <= 0
+          ) #{cafe.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
 
   script.
     // Search functionality
@@ -69,11 +71,10 @@ block content
     document.querySelectorAll('.book-cover').forEach((cover, index) => {
       // Generate colors for cafe products
       const colors = [
-        '#F29849', // accent
-        '#BF8B5E', // text-light
-        '#8C442A', // secondary
-        '#F2CD88', // highlight
-        '#402320', // primary
+        '#ddbc95', // accent
+        '#b38867', // secondary
+        '#626d71', // primary
+        '#cdcdc0', // highlight
       ];
       const color = colors[index % colors.length];
       

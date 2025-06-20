@@ -350,28 +350,7 @@ app.get('/financial', async (req, res) => {
   }
 });
 
-app.get('/stock', (req, res) => {
-  try {
-    // Check if user is logged in and has appropriate role
-    if (!req.session.user) {
-      return res.redirect('/login');
-    }
-    
-    // Only allow admin to access the stock page
-    if (req.session.user.role !== 'admin') {
-      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
-    }
-    
-    console.log('Renderizando stock.pug');
-    res.render('stock', { 
-      title: 'Inventario de Cafetería', 
-      user: req.session.user
-    });
-  } catch (error) {
-    console.error('Error en /stock:', error);
-    res.status(500).send(`Error al cargar el inventario de cafetería: ${error.message}`);
-  }
-});
+// Stock route moved to webRoutes.js
 
 app.get('/cart', (req, res) => {
   try {

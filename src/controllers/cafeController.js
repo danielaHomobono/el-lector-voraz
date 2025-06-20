@@ -18,6 +18,9 @@
         return res.status(400).json({ error: 'Nombre, precio, stock y categoría son requeridos' });
       }
       const newCafe = await cafeService.createCafe(cafeData);
+      // Emitir evento de actualización de stock
+      const io = req.app.get('io');
+      io.emit('updateStock', { type: 'cafe', action: 'create', data: newCafe });
       res.status(201).json(newCafe);
     } catch (error) {
       handleError(res, error, 400);
@@ -32,6 +35,9 @@
         return res.status(400).json({ error: 'Nombre, precio, stock y categoría son requeridos' });
       }
       const updatedCafe = await cafeService.updateCafe(id, cafeData);
+      // Emitir evento de actualización de stock
+      const io = req.app.get('io');
+      io.emit('updateStock', { type: 'cafe', action: 'update', data: updatedCafe });
       res.json(updatedCafe);
     } catch (error) {
       handleError(res, error, 400);
@@ -42,6 +48,9 @@
     try {
       const { id } = req.params;
       await cafeService.deleteCafe(id);
+      // Emitir evento de actualización de stock
+      const io = req.app.get('io');
+      io.emit('updateStock', { type: 'cafe', action: 'delete', id });
       res.json({ message: 'Café eliminado exitosamente' });
     } catch (error) {
       handleError(res, error, 400);

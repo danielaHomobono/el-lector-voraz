@@ -35,11 +35,10 @@ html(lang="es")
               li: a(href="/cart", aria-current=currentPath === '/cart' ? 'page' : null, class="cart-indicator") 
                 | Carrito
                 span.cart-count 0
-            else
-              li: a(href="/cafes", aria-current=currentPath === '/cafes' ? 'page' : null) Cafetería
             li: a(href="/logout") Cerrar sesión
-          else if currentPath !== '/login'
-            li: a(href="/login") Iniciar sesión
+          else
+            if currentPath !== '/login'
+              li: a(href="/login") Iniciar sesión
     main#main-content(role="main")
       div#message-container
       block content

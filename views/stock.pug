@@ -3,6 +3,22 @@ extends layout
 block scripts
   link(rel="stylesheet", href="/css/inventory.css")
   link(rel="stylesheet", href="/css/stock.css")
+  script(src="/socket.io/socket.io.js")
+  style.
+    #stock-toast {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background:rgb(39, 98, 41);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      z-index: 9999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: opacity 0.3s;
+    }
 
 block content
   h1 Inventario de Cafetería
@@ -125,7 +141,15 @@ block content
         
         button(type="submit") Guardar Cambios
 
+  #stock-toast ¡Stock actualizado!
+
   script.
+    // Conexión a Socket.IO para actualizaciones en tiempo real
+    const socket = io();
+    socket.on('updateStock', data => {
+      showStockToast();
+      updateStockTable();
+    });
     // La API key se pasa desde el backend como variable global
     const API_KEY = !{JSON.stringify(apiKey || '')};
     
@@ -377,4 +401,38 @@ block content
       } catch (error) {
         alert('Error al eliminar el item');
       }
+    }
+
+    function showStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.display = 'block';
+      toast.style.opacity = 1;
+      setTimeout(() => {
+        toast.style.opacity = 0;
+        setTimeout(() => { toast.style.display = 'none'; }, 400);
+      }, 5000);
+    }
+
+    async function updateStockTable() {
+      const res = await fetch('/api/stock');
+      const stockItems = await res.json();
+      const tbody = document.querySelector('#stockTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      stockItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td>${item.type}</td>
+          <td>${item.quantity}</td>
+          <td>${item.unit}</td>
+          <td>${item.minStock}</td>
+          <td>${item.supplier || 'N/A'}</td>
+          <td class="actions">
+            <button class="edit-btn" onclick="editStock('${item._id}')">Editar</button>
+            <button class="delete-btn" onclick="deleteStock('${item._id}')">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     }

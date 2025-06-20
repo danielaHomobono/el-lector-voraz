@@ -3,7 +3,38 @@ extends layout
 block scripts
   link(rel="stylesheet", href="/css/inventory.css")
   link(rel="stylesheet", href="/css/stock.css")
+  script(src="/socket.io/socket.io.js")
+  style.
+    #stock-toast {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4caf50;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      z-index: 9999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: opacity 0.3s;
+    }
+    #stock-toast .close-toast {
+      margin-left: 16px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.2em;
+      border: none;
+      background: transparent;
+    }
   script.
+    // Conexión a Socket.IO para actualizaciones en tiempo real
+    const socket = io();
+    socket.on('updateStock', data => {
+      showStockToast();
+      updateCafeTable();
+    });
     // La API key se pasa desde el backend como variable global
     const API_KEY = !{JSON.stringify(apiKey || '')};
 
@@ -87,7 +118,7 @@ block content
               each cafe in cafes
                 tr
                   td= cafe.name
-                  td= cafe.description
+                  td= cafe.description || ''
                   td= cafe.category
                   td $#{cafe.price}
                   td= cafe.stock
@@ -125,6 +156,10 @@ block content
             option(value="Comida") Comida
             option(value="Postre") Postre
         button(type="submit") Guardar Cambios
+
+  #stock-toast
+    | ¡Stock actualizado!
+    button.close-toast(type="button" onclick="closeStockToast()") ×
 
   script.
     // Sort table by column
@@ -198,8 +233,8 @@ block content
               body: JSON.stringify(data)
             });
             if (res.ok) {
-              alert('Producto agregado exitosamente');
-              window.location.reload();
+              showStockToast();
+              updateCafeTable();
             } else {
               const err = await res.json();
               alert('Error: ' + (err.error || 'No se pudo agregar el producto.'));
@@ -238,8 +273,8 @@ block content
           headers: { 'x-voraz-key': API_KEY }
         });
         if (res.ok) {
-          alert('Producto eliminado');
-          window.location.reload();
+          showStockToast();
+          updateCafeTable();
         } else {
           const err = await res.json();
           alert('Error: ' + (err.error || 'No se pudo eliminar.'));
@@ -293,8 +328,8 @@ block content
             body: JSON.stringify(data)
           });
           if (res.ok) {
-            alert('Producto actualizado exitosamente');
-            window.location.reload();
+            showStockToast();
+            updateCafeTable();
           } else {
             const err = await res.json();
             alert('Error: ' + (err.error || 'No se pudo actualizar el producto.'));
@@ -311,3 +346,36 @@ block content
     // Quitar solo la columna y celda de 'Disponible', pero dejar el resto igual.
     // En el modal de edición:
     // Quitar solo el campo de 'Disponible', pero dejar el resto igual.
+
+    function showStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.display = 'block';
+      toast.style.opacity = 1;
+    }
+    function closeStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.opacity = 0;
+      setTimeout(() => { toast.style.display = 'none'; }, 400);
+    }
+    async function updateCafeTable() {
+      const res = await fetch('/api/cafe');
+      const cafes = await res.json();
+      const tbody = document.querySelector('#cafesTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      cafes.forEach(cafe => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${cafe.name}</td>
+          <td>${cafe.description || ''}</td>
+          <td>${cafe.category}</td>
+          <td>$${cafe.price}</td>
+          <td>${cafe.stock}</td>
+          <td class="actions">
+            <button class="edit-btn" onclick="editCafe('${cafe.id}')">Editar</button>
+            <button class="delete-btn" onclick="deleteCafe('${cafe.id}')">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }

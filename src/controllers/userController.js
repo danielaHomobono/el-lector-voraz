@@ -31,12 +31,21 @@
     try {
       const { id } = req.params;
       const userData = req.body;
-      if (!userData.email || !userData.password || !userData.role) {
-        return res.status(400).json({ error: 'Email, contraseña y rol son requeridos' });
+      
+      // Para actualización, email y rol son requeridos, pero contraseña es opcional
+      if (!userData.email || !userData.role) {
+        return res.status(400).json({ error: 'Email y rol son requeridos' });
       }
+      
       if (!['admin', 'client', 'staff'].includes(userData.role)) {
         return res.status(400).json({ error: 'Rol debe ser "admin", "client" o "staff"' });
       }
+      
+      // Si la contraseña está vacía, la removemos del objeto para no actualizarla
+      if (!userData.password || userData.password.trim() === '') {
+        delete userData.password;
+      }
+      
       const updatedUser = await userService.updateUser(id, userData);
       res.json(updatedUser);
     } catch (error) {

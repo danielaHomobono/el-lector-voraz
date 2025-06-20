@@ -39,4 +39,8 @@ async function deleteSale(id) {
   await Sale.findByIdAndDelete(id);
 }
 
-module.exports = { getSales, createSale, updateSale, deleteSale };
+async function getSaleById(id) {
+  return await Sale.findById(id);
+}
+
+module.exports = { getSales, createSale, updateSale, deleteSale, getSaleById };

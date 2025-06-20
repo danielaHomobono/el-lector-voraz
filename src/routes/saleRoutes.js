@@ -6,20 +6,24 @@ const authMiddleware = require('../middleware/authMiddleware');
 const { v4: uuidv4 } = require('uuid');
 const { handleError } = require('../utils/errorHandler');
 const Sale = require('../models/Sale');
+const saleController = require('../controllers/saleController');
 
 // GET: Obtener todas las ventas (ahora desde MongoDB)
-router.get('/', authMiddleware.verifyApiKey, async (req, res) => {
-  try {
-    const sales = await Sale.find().sort({ createdAt: -1 });
-    res.json(sales);
-  } catch (error) {
-    console.error('Error en GET /api/ventas:', error);
-    handleError(res, error, 500);
-  }
-});
+router.get('/', authMiddleware.verifyApiKey, saleController.getAllSales);
 
 // POST: Crear una nueva venta (requiere solo API key)
-router.post('/', authMiddleware.verifyApiKey, require('../controllers/saleController').createSale);
+router.post('/', authMiddleware.verifyApiKey, saleController.createSale);
+
+// Nueva ruta para obtener una venta por ID
+router.get('/:id', authMiddleware.verifyApiKey, async (req, res) => {
+  try {
+    const sale = await saleController.getSaleById(req, res);
+    // No necesitamos hacer nada más aquí, el controlador ya maneja la respuesta
+  } catch (error) {
+    console.error('Error en GET /api/ventas/:id:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
 // PUT: Modificar una venta (requiere API key y admin)
 router.put('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {

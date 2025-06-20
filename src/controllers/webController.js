@@ -44,7 +44,7 @@ async function cafesPage(req, res) {
       title: 'Inventario de Cafetería',
       cafes,
       user: req.session.user,
-      apiKey: process.env.API_KEY
+      apiKey: process.env.API_KEY || ''
     });
   } catch (error) {
     handleError(res, error, 500);
@@ -84,11 +84,12 @@ async function clientsPage(req, res) {
 
 async function salesPage(req, res) {
   try {
-    const sales = await fileService.readFile('src/data/sales.json');
-    res.render('sales', { 
+    const Sale = require('../models/Sale');
+    const sales = await Sale.find().sort({ createdAt: -1 });
+    res.render('sales', {
       title: 'Ventas',
       sales,
-      user: req.session.user
+      apiKey: process.env.API_KEY || ''
     });
   } catch (error) {
     handleError(res, error, 500);
@@ -114,7 +115,7 @@ async function cartPage(req, res) {
 }
 
 async function checkoutPage(req, res) {
-  res.render('checkout', { title: 'Finalizar Compra', user: req.session.user, apiKey: process.env.API_KEY });
+  res.render('checkout', { title: 'Finalizar Compra', user: req.session.user, apiKey: process.env.API_KEY || '' });
 }
 
 async function stockPage(req, res) {
@@ -125,7 +126,7 @@ async function stockPage(req, res) {
       title: 'Inventario de Cafetería',
       stockItems: [],
       user: req.session.user,
-      apiKey: process.env.API_KEY
+      apiKey: process.env.API_KEY || ''
     });
   } catch (error) {
     handleError(res, error, 500);

@@ -2,6 +2,7 @@ extends layout
 
 block scripts
   script(src="/js/cart.js", defer)
+  script(src="/socket.io/socket.io.js")
 
 block content
   h1 Catálogo de Libros
@@ -94,4 +95,10 @@ block content
       const pattern = document.createElement('div');
       pattern.className = 'cover-pattern';
       cover.appendChild(pattern);
+    });
+
+    const socket = io();
+    socket.on('updateStock', data => {
+      // Aquí puedes recargar la tabla, mostrar notificación, etc.
+      window.location.reload(); // O actualiza solo la parte necesaria
     });

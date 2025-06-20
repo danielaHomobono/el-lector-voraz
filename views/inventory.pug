@@ -2,6 +2,31 @@ extends layout
 
 block scripts
   link(rel="stylesheet", href="/css/inventory.css")
+  script(src="/socket.io/socket.io.js")
+  style.
+    #stock-toast {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4caf50;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      z-index: 9999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: opacity 0.3s;
+    }
+    #stock-toast .close-toast {
+      margin-left: 16px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.2em;
+      border: none;
+      background: transparent;
+    }
 
 block content
   h1 Inventario de Libros
@@ -114,7 +139,17 @@ block content
         
         button(type="submit") Guardar Cambios
 
+  #stock-toast
+    | ¡Stock actualizado!
+    button.close-toast(type="button" onclick="closeStockToast()") ×
+
   script.
+    // Conexión a Socket.IO para actualizaciones en tiempo real
+    const socket = io();
+    socket.on('updateStock', data => {
+      showStockToast();
+      updateBooksTable();
+    });
     // La API key se pasa desde el backend como variable global
     const API_KEY = !{JSON.stringify(apiKey)};
     
@@ -220,9 +255,9 @@ block content
         });
 
         if (response.ok) {
-          alert('Libro agregado exitosamente');
           document.getElementById('addBookForm').reset();
-          window.location.reload();
+          showStockToast();
+          updateBooksTable();
         } else {
           const data = await response.json();
           alert('Error: ' + (data.error || 'Error al agregar el libro'));
@@ -362,9 +397,9 @@ block content
         });
         
         if (response.ok) {
-          alert('Libro actualizado exitosamente');
           modal.style.display = "none";
-          window.location.reload();
+          showStockToast();
+          updateBooksTable();
         } else {
           const data = await response.json();
           alert('Error: ' + (data.error || 'No se pudo actualizar el libro'));
@@ -387,8 +422,8 @@ block content
         });
         
         if (response.ok) {
-          alert('Libro eliminado exitosamente');
-          window.location.reload();
+          showStockToast();
+          updateBooksTable();
         } else {
           const data = await response.json();
           alert('Error: ' + (data.error || 'No se pudo eliminar el libro'));
@@ -396,4 +431,40 @@ block content
       } catch (error) {
         alert('Error al eliminar el libro');
       }
+    }
+
+    function showStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.display = 'block';
+      toast.style.opacity = 1;
+    }
+
+    function closeStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.opacity = 0;
+      setTimeout(() => { toast.style.display = 'none'; }, 400);
+    }
+
+    async function updateBooksTable() {
+      const res = await fetch('/api/products');
+      const products = await res.json();
+      const tbody = document.querySelector('#booksTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      products.forEach(product => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${product.title}</td>
+          <td>${product.author}</td>
+          <td>${product.isbn}</td>
+          <td>${product.category}</td>
+          <td>$${product.price}</td>
+          <td>${product.stock}</td>
+          <td class="actions">
+            <button class="edit-btn" onclick="editBook('${product.isbn}')">Editar</button>
+            <button class="delete-btn" onclick="deleteBook('${product.isbn}')">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     }

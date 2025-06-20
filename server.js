@@ -20,6 +20,14 @@ const webRoutes = require('./src/routes/webRoutes');
 
 const app = express();
 
+// --- SOCKET.IO INTEGRACIÓN ---
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server);
+app.set('io', io);
+// --- FIN SOCKET.IO ---
+
 // Conectar a MongoDB
 connectDB();
 
@@ -377,6 +385,6 @@ app.use((req, res) => {
 console.log('API_KEY en backend:', process.env.API_KEY);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

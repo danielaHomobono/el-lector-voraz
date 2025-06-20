@@ -40,4 +40,11 @@ router.get('/logout', (req, res) => {
   });
 });
 
+// Ruta para obtener configuración del cliente
+router.get('/api/config', (req, res) => {
+  res.json({
+    apiKey: process.env.API_KEY || ''
+  });
+});
+
 module.exports = router;

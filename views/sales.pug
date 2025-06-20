@@ -61,15 +61,15 @@ block content
           if sales && sales.length > 0
             each sale in sales
               tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
-                td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= sale.id
-                td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= sale.date ? new Date(sale.date).toLocaleDateString() : (sale.createdAt ? new Date(sale.createdAt).toLocaleDateString() : 'N/A')
+                td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= sale._id
+                td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;", data-date=sale.createdAt ? new Date(sale.createdAt).toISOString().slice(0, 10) : '')= sale.createdAt ? new Date(sale.createdAt).toLocaleDateString() : 'N/A'
                 td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= sale.total ? `$${sale.total.toFixed(2)}` : '$0.00'
                 td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= sale.channel || 'N/A'
                 td(style="padding: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")= sale.clientName || 'Sin cliente'
                 td(style="padding: 1rem;")
                   button(
                     style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer;"
-                    onclick=`viewSaleDetails('${sale.id}')`
+                    onclick=`viewSaleDetails('${sale._id}')`
                   ) Ver Detalles
           else
             tr
@@ -78,7 +78,7 @@ block content
   // Sale Details Modal
   div#saleModal(style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow: auto;")
     div(style="background-color: white; margin: 10% auto; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 90%; max-width: 600px; position: relative;")
-      span.close-btn(style="position: absolute; top: 1rem; right: 1rem; color: var(--text-light); font-size: 1.5rem; font-weight: bold; cursor: pointer;") &times;
+      span.close-btn(style="position: absolute; top: 1rem; right: 1rem; color: var(--text-light); font-size: 1.5rem; font-weight: bold; cursor: pointer;" onclick="document.getElementById('saleModal').style.display='none'") &times;
       h3(style="color: var(--primary); margin-top: 0; margin-bottom: 1.5rem; font-weight: 400; text-align: center;") Detalles de Venta
       
       div(style="margin-bottom: 1.5rem;")
@@ -122,9 +122,55 @@ block content
         h4(style="margin: 0 0 1rem 0; color: var(--primary); font-size: 1.1rem; font-weight: 500; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.5rem;") Productos
         ul#saleItems(style="list-style: none; padding: 0; margin: 0;")
 
+  #stock-toast
+    | ¡Stock actualizado!
+    button.close-toast(type="button" onclick="closeStockToast()") ×
+
+block scripts
+  script(src="/socket.io/socket.io.js")
+  style.
+    #stock-toast {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4caf50;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      z-index: 9999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: opacity 0.3s;
+    }
+    #stock-toast .close-toast {
+      margin-left: 16px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.2em;
+      border: none;
+      background: transparent;
+    }
   script.
+    let apiKey = '';
+    
+    // Obtener la API key del servidor
+    async function getApiKey() {
+      try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        apiKey = config.apiKey || '';
+      } catch (error) {
+        console.warn('No se pudo obtener la API key:', error);
+        apiKey = '';
+      }
+    }
+    
     // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+      await getApiKey();
+      
       // Set up filter functionality
       document.getElementById('applyFilter').addEventListener('click', filterSales);
       document.getElementById('resetFilter').addEventListener('click', resetFilters);
@@ -166,39 +212,52 @@ block content
     
     // Filter sales based on criteria
     function filterSales() {
+      console.log('Función filterSales ejecutada');
       const dateFrom = document.getElementById('dateFrom').value;
       const dateTo = document.getElementById('dateTo').value;
       const channel = document.getElementById('channelFilter').value;
       
-      const rows = document.querySelectorAll('#salesTable tbody tr');
+      console.log('Filtros aplicados:', { dateFrom, dateTo, channel });
       
-      rows.forEach(row => {
-        // Skip the "No hay ventas registradas" row
-        if (row.querySelector('td').colSpan === 6) return;
+      const rows = document.querySelectorAll('#salesTable tbody tr');
+      console.log('Filas encontradas:', rows.length);
+      
+      rows.forEach((row, index) => {
+        // Verificar que la fila existe y no es la fila de "No hay ventas"
+        if (!row || row.querySelector('td')?.colSpan === 6) {
+          console.log(`Fila ${index}: saltando (no es una fila de venta)`);
+          return;
+        }
         
         let show = true;
-        const dateCell = row.querySelector('td:nth-child(2)').textContent;
-        const channelCell = row.querySelector('td:nth-child(4)').textContent;
+        const dateCell = row.querySelector('td:nth-child(2)');
+        const channelCell = row.querySelector('td:nth-child(4)');
         
-        const rowDate = new Date(dateCell);
+        if (!dateCell || !channelCell) {
+          console.log(`Fila ${index}: celdas no encontradas`);
+          return;
+        }
         
-        if (dateFrom && new Date(dateFrom) > rowDate) {
+        const channelText = channelCell.textContent;
+        const rowDateISO = dateCell.getAttribute('data-date');
+        const rowDate = rowDateISO ? rowDateISO.slice(0, 10) : '';
+        
+        console.log(`Fila ${index}:`, { rowDate, channelText });
+        
+        if (dateFrom && rowDate && dateFrom > rowDate) {
           show = false;
+          console.log(`Fila ${index}: oculta por fecha desde`);
         }
-        
-        if (dateTo) {
-          // Add one day to include the end date
-          const endDate = new Date(dateTo);
-          endDate.setDate(endDate.getDate() + 1);
-          if (endDate < rowDate) {
-            show = false;
-          }
-        }
-        
-        if (channel && channelCell !== channel) {
+        if (dateTo && rowDate && dateTo < rowDate) {
           show = false;
+          console.log(`Fila ${index}: oculta por fecha hasta`);
+        }
+        if (channel && channelText !== channel) {
+          show = false;
+          console.log(`Fila ${index}: oculta por canal`);
         }
         
+        console.log(`Fila ${index}: mostrar = ${show}`);
         row.style.display = show ? '' : 'none';
       });
     }
@@ -222,7 +281,9 @@ block content
     // Close modal when clicking the X
     if (closeBtn) {
       closeBtn.onclick = function() {
-        modal.style.display = 'none';
+        if (modal) {
+          modal.style.display = 'none';
+        }
       }
     }
     
@@ -233,60 +294,154 @@ block content
       }
     }
     
+    // Función adicional para cerrar el modal
+    function closeModal() {
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+    
     // View sale details
-    function viewSaleDetails(saleId) {
-      // In a real app, you would fetch the sale details from the server
-      // For now, we'll find it in the existing sales data
-      const sales = !{JSON.stringify(sales || [])};
-      const sale = sales.find(s => s.id === saleId);
-      
-      if (sale) {
-        document.getElementById('saleId').textContent = sale.id;
-        document.getElementById('saleDate').textContent = sale.date ? new Date(sale.date).toLocaleString() : 'N/A';
-        document.getElementById('saleTotal').textContent = sale.total ? `$${sale.total.toFixed(2)}` : '$0.00';
-        document.getElementById('saleChannel').textContent = sale.channel || 'N/A';
-        document.getElementById('saleClient').textContent = sale.clientName || sale.clientId || 'Sin cliente';
-        document.getElementById('saleClientEmail').textContent = sale.clientEmail || 'N/A';
-        document.getElementById('saleClientPoints').textContent = sale.clientPoints !== undefined ? sale.clientPoints : 'N/A';
-        document.getElementById('saleUser').textContent = sale.userEmail || 'N/A';
+    async function viewSaleDetails(saleId) {
+      try {
+        console.log('Obteniendo detalles de venta:', saleId);
         
-        const itemsList = document.getElementById('saleItems');
-        itemsList.innerHTML = '';
-        
-        if (sale.items && sale.items.length > 0) {
-          sale.items.forEach(item => {
-            const li = document.createElement('li');
-            li.style.display = 'flex';
-            li.style.justifyContent = 'space-between';
-            li.style.padding = '0.75rem 0';
-            li.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
-            
-            // Use product name if available, otherwise use ID
-            const productName = item.productName || item.productId || 'Producto';
-            const productType = item.productType || item.type || 'Producto';
-            
-            li.innerHTML = `
-              <div>
-                <div style="font-weight: 500;">${productName}</div>
-                <div style="color: var(--text-light); font-size: 0.9rem;">
-                  ${productType === 'book' ? 'Libro' : 'Café'} - Cantidad: ${item.quantity || 1}
-                </div>
-              </div>
-              <div style="font-weight: 500; color: var(--primary);">$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
-            `;
-            itemsList.appendChild(li);
-          });
-        } else {
-          const li = document.createElement('li');
-          li.textContent = 'No hay ítems en esta venta.';
-          li.style.textAlign = 'center';
-          li.style.padding = '1rem 0';
-          li.style.color = 'var(--text-light)';
-          itemsList.appendChild(li);
+        // Verificar que el modal existe
+        const modal = document.getElementById('saleModal');
+        if (!modal) {
+          throw new Error('Modal no encontrado en el DOM');
         }
         
-        modal.style.display = 'block';
-      } else {
-        alert('No se encontraron detalles para esta venta.');
+        const res = await fetch(`/api/ventas/${saleId}`, {
+          headers: {
+            'x-voraz-key': apiKey
+          }
+        });
+
+        console.log('Respuesta del servidor:', res.status);
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}: No se pudieron obtener los detalles de la venta.`);
+        }
+
+        const sale = await res.json();
+        console.log('Datos de venta recibidos:', sale);
+        
+        if (sale) {
+          // Verificar que todos los elementos del modal existen
+          const saleIdElement = document.getElementById('saleId');
+          const saleDateElement = document.getElementById('saleDate');
+          const saleTotalElement = document.getElementById('saleTotal');
+          const saleChannelElement = document.getElementById('saleChannel');
+          const saleClientElement = document.getElementById('saleClient');
+          const saleClientEmailElement = document.getElementById('saleClientEmail');
+          const saleClientPointsElement = document.getElementById('saleClientPoints');
+          const saleUserElement = document.getElementById('saleUser');
+          const itemsList = document.getElementById('saleItems');
+          
+          if (!saleIdElement || !saleDateElement || !saleTotalElement || !saleChannelElement || 
+              !saleClientElement || !saleClientEmailElement || !saleClientPointsElement || 
+              !saleUserElement || !itemsList) {
+            throw new Error('Elementos del modal no encontrados');
+          }
+          
+          saleIdElement.textContent = sale._id;
+          saleDateElement.textContent = sale.createdAt ? new Date(sale.createdAt).toLocaleString() : 'N/A';
+          saleTotalElement.textContent = sale.total ? `$${sale.total.toFixed(2)}` : '$0.00';
+          saleChannelElement.textContent = sale.channel || 'N/A';
+          saleClientElement.textContent = sale.clientName || sale.clientId || 'Sin cliente';
+          saleClientEmailElement.textContent = sale.clientEmail || 'N/A';
+          saleClientPointsElement.textContent = sale.clientPoints !== undefined ? sale.clientPoints : 'N/A';
+          saleUserElement.textContent = sale.userEmail || 'N/A';
+          
+          itemsList.innerHTML = '';
+          
+          if (sale.items && sale.items.length > 0) {
+            sale.items.forEach(item => {
+              const li = document.createElement('li');
+              li.style.display = 'flex';
+              li.style.justifyContent = 'space-between';
+              li.style.padding = '0.75rem 0';
+              li.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+              
+              const productName = item.productName || item.productId || 'Producto';
+              const productType = item.productType || item.type || 'Producto';
+              
+              li.innerHTML = `
+                <div>
+                  <div style="font-weight: 500;">${productName}</div>
+                  <div style="color: var(--text-light); font-size: 0.9rem;">
+                    ${productType === 'book' ? 'Libro' : 'Café'} - Cantidad: ${item.quantity || 1}
+                  </div>
+                </div>
+                <div style="font-weight: 500; color: var(--primary);">$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
+              `;
+              itemsList.appendChild(li);
+            });
+          } else {
+            const li = document.createElement('li');
+            li.textContent = 'No hay ítems en esta venta.';
+            li.style.textAlign = 'center';
+            li.style.padding = '1rem 0';
+            li.style.color = 'var(--text-light)';
+            itemsList.appendChild(li);
+          }
+          
+          modal.style.display = 'block';
+        } else {
+          alert('No se encontraron detalles para esta venta.');
+        }
+      } catch (error) {
+        console.error('Error al ver detalles de la venta:', error);
+        alert('Error: ' + error.message);
       }
+    }
+
+    // Conexión a Socket.IO para actualizaciones en tiempo real
+    const socket = io();
+    socket.on('updateStock', data => {
+      showStockToast();
+      updateSalesTable();
+    });
+    function showStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.display = 'block';
+      toast.style.opacity = 1;
+    }
+    function closeStockToast() {
+      const toast = document.getElementById('stock-toast');
+      toast.style.opacity = 0;
+      setTimeout(() => { toast.style.display = 'none'; }, 400);
+    }
+    async function updateSalesTable() {
+      const res = await fetch('/api/ventas', {
+        headers: {
+          'x-voraz-key': apiKey
+        }
+      });
+      const sales = await res.json();
+      console.log('Ventas recibidas:', sales);
+      const tbody = document.querySelector('#salesTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      sales.forEach(sale => {
+        const tr = document.createElement('tr');
+        let dateISO = '';
+        if (sale.date) {
+          dateISO = new Date(sale.date).toISOString().slice(0, 10);
+        } else if (sale.createdAt) {
+          dateISO = new Date(sale.createdAt).toISOString().slice(0, 10);
+        } else {
+          console.warn('Venta sin fecha:', sale);
+        }
+        tr.innerHTML = `
+          <td>${sale._id}</td>
+          <td data-date="${dateISO}">${dateISO ? new Date(dateISO).toLocaleDateString() : 'N/A'}</td>
+          <td>$${sale.total ? sale.total.toFixed(2) : '0.00'}</td>
+          <td>${sale.channel || 'N/A'}</td>
+          <td>${sale.clientName || 'Sin cliente'}</td>
+          <td><button style=\"padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer;\" onclick=\"viewSaleDetails('${sale._id}')\">Ver Detalles</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      filterSales();
     }

@@ -18,6 +18,9 @@
         return res.status(400).json({ error: 'Título, autor, ISBN, precio y stock son requeridos' });
       }
       const newProduct = await productService.createProduct(productData);
+      // Emitir evento de actualización de stock
+      const io = req.app.get('io');
+      io.emit('updateStock', { type: 'product', action: 'create', data: newProduct });
       res.status(201).json(newProduct);
     } catch (error) {
       handleError(res, error, 400);
@@ -32,6 +35,9 @@
         return res.status(400).json({ error: 'Título, autor, ISBN, precio y stock son requeridos' });
       }
       const updatedProduct = await productService.updateProduct(id, productData);
+      // Emitir evento de actualización de stock
+      const io = req.app.get('io');
+      io.emit('updateStock', { type: 'product', action: 'update', data: updatedProduct });
       res.json(updatedProduct);
     } catch (error) {
       handleError(res, error, 400);
@@ -42,6 +48,9 @@
     try {
       const { id } = req.params;
       await productService.deleteProduct(id);
+      // Emitir evento de actualización de stock
+      const io = req.app.get('io');
+      io.emit('updateStock', { type: 'product', action: 'delete', id });
       res.json({ message: 'Producto eliminado exitosamente' });
     } catch (error) {
       handleError(res, error, 400);

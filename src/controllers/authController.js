@@ -44,6 +44,15 @@ async function login(req, res) {
       email: user.email, 
       role: user.role 
     };
+    
+    // Guardar la sesión explícitamente
+    req.session.save(err => {
+      if (err) {
+        console.error('Error al guardar la sesión:', err);
+      } else {
+        console.log('Sesión guardada correctamente para:', user.email);
+      }
+    });
 
     // Generar tokens JWT
     const accessToken = generateToken(user);

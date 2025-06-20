@@ -1,57 +1,315 @@
 extends layout
 
+block scripts
+  script(src="/js/cart.js", defer)
+  style.
+    /* Checkout specific styles */
+    .checkout-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .checkout-summary, .checkout-form {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+    
+    .checkout-summary h2, .checkout-form h2 {
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+      text-align: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .checkout-items-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .checkout-items-list li {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      align-items: center;
+    }
+    
+    .item-title {
+      font-weight: 500;
+      color: var(--text);
+    }
+    
+    .item-type {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+    }
+    
+    .item-quantity {
+      text-align: center;
+      color: var(--text-light);
+    }
+    
+    .item-price {
+      text-align: right;
+      font-weight: 500;
+      color: var(--secondary);
+    }
+    
+    .checkout-total {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 2px solid rgba(0,0,0,0.1);
+      font-weight: 600;
+      text-align: right;
+      font-size: 1.25rem;
+      color: var(--secondary);
+    }
+    
+    .checkout-form select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      height: 42px;
+      box-sizing: border-box;
+      background-color: white;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: calc(100% - 12px) center;
+      padding-right: 30px;
+    }
+    
+    .checkout-form button[type="submit"] {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--secondary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 1rem;
+    }
+    
+    .checkout-form button[type="submit"]:hover {
+      background-color: var(--primary);
+    }
+    
+    @media (max-width: 768px) {
+      .checkout-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .checkout-items-list li {
+        grid-template-columns: 2fr 1fr 1fr;
+      }
+    }
+
 block content
   h1 Finalizar Compra
-  if !user || user.role !== 'client'
-    p Debes iniciar sesión como cliente para finalizar la compra.
-  else
-    form#checkoutForm(action='/api/ventas' method='POST')
-      .form-group
-        label(for='name') Nombre:
-        input#name(type='text' name='name' required)
-      .form-group
-        label(for='email') Email:
-        input#email(type='email' name='email' required value=user.email)
-      .form-group
-        label(for='address') Dirección:
-        input#address(type='text' name='address' required)
-      button(type='submit') Confirmar compra
-    script.
-      // La API key se pasa desde el backend como variable global
-      const API_KEY = !{JSON.stringify(apiKey)};
-      document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+  
+  .checkout-container
+    .checkout-summary
+      h2 Resumen de tu pedido
+      #checkout-items
+        // Will be populated by JavaScript
+      
+    .checkout-form
+      h2 Información de pago
+      
+      form#checkout-form(novalidate)
+        .form-group
+          label(for="name") Nombre completo:
+          input#name(type="text" name="name" required aria-required="true")
+        
+        .form-group
+          label(for="email") Email:
+          input#email(type="email" name="email" required aria-required="true")
+        
+        .form-group
+          label(for="address") Dirección:
+          input#address(type="text" name="address" required aria-required="true")
+        
+        .form-group
+          label(for="payment") Método de pago:
+          select#payment(name="payment" required aria-required="true")
+            option(value="") Seleccione un método de pago
+            option(value="credit") Tarjeta de crédito
+            option(value="debit") Tarjeta de débito
+            option(value="transfer") Transferencia bancaria
+        
+        button(type="submit") Completar compra
+  
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Populate checkout summary
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const checkoutItems = document.getElementById('checkout-items');
+      
+      if (cart.length === 0) {
+        checkoutItems.innerHTML = '<p>No hay productos en el carrito</p>';
+        document.querySelector('button[type="submit"]').disabled = true;
+        return;
+      }
+      
+      let total = 0;
+      let html = '<ul class="checkout-items-list">';
+      
+      cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        
+        // Use the product type from the cart item if available
+        // Otherwise, determine it based on the product ID
+        const productType = item.type || (item.productId && item.productId.includes('cafe-') ? 'cafe' : 'book');
+        
+        html += `
+          <li>
+            <div>
+              <div class="item-title">${item.title}</div>
+              <div class="item-type">${productType === 'book' ? 'Libro' : 'Café'}</div>
+            </div>
+            <div class="item-quantity">x${item.quantity}</div>
+            <div class="item-price">${itemTotal.toFixed(2)}</div>
+          </li>
+        `;
+      });
+      
+      html += '</ul>';
+      html += `<div class="checkout-total">Total: $${total.toFixed(2)}</div>`;
+      
+      checkoutItems.innerHTML = html;
+      
+      // Form submission
+      document.getElementById('checkout-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-        // Leer carrito de localStorage
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        if (!cart.length) {
-          alert('El carrito está vacío.');
+        
+        // Basic form validation
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const payment = document.getElementById('payment').value;
+        
+        if (!name || !email || !address || !payment) {
+          showMessage('Por favor complete todos los campos', 'error');
           return;
         }
-        // Obtener datos del formulario
-        const formData = {
-          name: document.getElementById('name').value,
-          email: document.getElementById('email').value,
-          address: document.getElementById('address').value,
-          products: cart
-        };
+        
+        // Show loading
+        showLoading();
+        
         try {
-          const response = await fetch('/api/ventas', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-voraz-key': API_KEY
-            },
-            body: JSON.stringify(formData)
-          });
-          if (response.ok) {
-            alert('¡Compra confirmada!');
+          // In a real app, you would send the order to the server here
+          // For now, we'll just simulate a successful order
+          
+          setTimeout(async () => {
+            // Generate order details
+            const orderNumber = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+            const orderDate = new Date().toLocaleString();
+            const orderTotal = total;
+            
+            // Save the sale to the database
+            try {
+              // Create sale object
+              const saleData = {
+                items: cart.map(item => ({
+                  productId: item.productId,
+                  type: item.type || 'book',
+                  price: item.price,
+                  quantity: item.quantity
+                })),
+                total: orderTotal,
+                channel: 'web',
+                date: new Date(),
+                clientId: document.getElementById('email').value
+              };
+              
+              // Send to server
+              await fetch('/api/ventas', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(saleData)
+              });
+            } catch (err) {
+              console.error('Error saving sale:', err);
+            }
+            
+            // Clear cart
             localStorage.removeItem('cart');
-            window.location.href = '/products';
-          } else {
-            const data = await response.json();
-            alert('Error: ' + (data.error || 'No se pudo registrar la venta'));
-          }
+            
+            // Hide loading
+            hideLoading();
+            
+            // Show confirmation directly on this page
+            const checkoutContainer = document.querySelector('.checkout-container');
+            
+            // Create confirmation HTML
+            const confirmationHTML = `
+              <div style="max-width: 800px; margin: 2rem auto; text-align: center; background: var(--card-bg); padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);">
+                <div style="margin-bottom: 1.5rem;">
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: var(--success);">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                
+                <h1 style="color: var(--primary); margin-bottom: 0.5rem;">¡Gracias por tu compra!</h1>
+                <p style="color: var(--text-light); font-size: 1.1rem; margin-bottom: 2rem;">Tu pedido ha sido procesado correctamente.</p>
+                
+                <div style="background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: var(--border-radius); margin-bottom: 2rem; text-align: left;">
+                  <h2 style="color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-size: 1.3rem;">Detalles del pedido</h2>
+                  
+                  <div style="margin-bottom: 1.5rem;">
+                    <p style="margin: 0.5rem 0;">
+                      <span style="font-weight: 500;">Número de pedido:</span> 
+                      <span>${orderNumber}</span>
+                    </p>
+                    <p style="margin: 0.5rem 0;">
+                      <span style="font-weight: 500;">Fecha:</span> 
+                      <span>${orderDate}</span>
+                    </p>
+                    <p style="margin: 0.5rem 0;">
+                      <span style="font-weight: 500;">Total:</span> 
+                      <span>${orderTotal.toFixed(2)}</span>
+                    </p>
+                  </div>
+                </div>
+                
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Recibirás un correo electrónico con los detalles de tu compra.</p>
+                
+                <div style="display: flex; justify-content: center; gap: 1rem;">
+                  <a href="/products" style="padding: 0.75rem 1.5rem; background-color: var(--secondary); color: white; text-decoration: none; border-radius: var(--border-radius);">Seguir comprando</a>
+                  <a href="/" style="padding: 0.75rem 1.5rem; background-color: var(--text-light); color: white; text-decoration: none; border-radius: var(--border-radius);">Ir al inicio</a>
+                </div>
+              </div>
+            `;
+            
+            // Replace checkout content with confirmation
+            checkoutContainer.innerHTML = confirmationHTML;
+            
+            // Update page title
+            document.title = 'Confirmación de Compra - El Lector Voraz';
+            
+            // Update cart count
+            updateCartCount();
+          }, 1500);
         } catch (error) {
-          alert('Error al registrar la venta');
+          hideLoading();
+          showMessage('Error al procesar la compra. Por favor, inténtelo de nuevo.', 'error');
         }
-      }); 
+      });
+    });

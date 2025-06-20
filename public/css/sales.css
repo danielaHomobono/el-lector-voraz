@@ -1,0 +1,212 @@
+/* Sales page styles - matching the inventory style */
+
+.sales-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Table container with scroll */
+.table-container {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+/* Chart container */
+.chart-container {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  height: 400px;
+}
+
+/* Table styles */
+.sales-table {
+  width: 100%;
+  min-width: 1200px; /* Increased minimum width */
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  table-layout: fixed; /* Fixed table layout for better column control */
+}
+
+.sales-table thead {
+  background-color: var(--primary);
+  color: var(--highlight);
+}
+
+.sales-table th,
+.sales-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflow */
+}
+
+.sales-table th {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.sales-table th:hover {
+  background-color: var(--primary-dark);
+}
+
+.sales-table tbody tr:hover {
+  background-color: rgba(0,0,0,0.02);
+}
+
+/* Action buttons */
+.view-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--accent);
+  color: var(--primary);
+  font-weight: bold;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+  background-color: var(--highlight);
+  transform: translateY(-2px);
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  overflow: auto;
+}
+
+.modal-content {
+  background-color: var(--card-bg);
+  margin: 10% auto;
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: var(--text-light);
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: var(--primary);
+}
+
+.modal h3 {
+  color: var(--primary);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  text-align: center;
+}
+
+/* Sale details */
+.sale-details {
+  margin-bottom: 1.5rem;
+}
+
+.detail-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.detail-group {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 1rem;
+}
+
+.detail-group h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.detail-group p {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Sale items */
+.sale-items {
+  margin-top: 1.5rem;
+}
+
+.sale-items h4 {
+  margin: 0 0 1rem 0;
+  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 0.5rem;
+}
+
+.item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.item-list li:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 500;
+}
+
+.item-details {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.item-price {
+  font-weight: 500;
+  color: var(--primary);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-light);
+}

@@ -3,37 +3,68 @@ html(lang="es")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="description", content="El Lector Voraz - Librería y cafetería")
     title El Lector Voraz
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:wght@300;400;500;600&display=swap")
     link(rel="stylesheet", href="/styles.css")
+    link(rel="stylesheet", href="/css/common.css")
+    script(src="/js/main.js", defer)
+    block scripts
   body
-    header
+    a(href="#main-content", class="skip-link sr-only") Saltar al contenido principal
+    header(role="banner")
       h1 El Lector Voraz
-      nav
+      nav(role="navigation", aria-label="Navegación principal")
         ul
           if user
             if user.role === 'admin'
-              li: a(href="/products") Catálogo de Libros
-              li: a(href="/inventory") Inventario
-              li: a(href="/cafes") Cafetería
-              li: a(href="/clients") Clientes
-              li: a(href="/sales") Ventas
-              li: a(href="/users") Usuarios
-              li: a(href="/financial") Reporte Financiero
+              li: a(href="/inventory", aria-current=currentPath === '/inventory' ? 'page' : null) Inventario
+              li: a(href="/stock", aria-current=currentPath === '/stock' ? 'page' : null) Stock Café
+              li: a(href="/clients", aria-current=currentPath === '/clients' ? 'page' : null) Clientes
+              li: a(href="/sales", aria-current=currentPath === '/sales' ? 'page' : null) Ventas
+              li: a(href="/users", aria-current=currentPath === '/users' ? 'page' : null) Usuarios
+              li: a(href="/financial", aria-current=currentPath === '/financial' ? 'page' : null) Reportes
             else if user.role === 'staff'
-              li: a(href="/products") Catálogo de Libros
-              li: a(href="/inventory") Inventario
-              li: a(href="/cafes") Cafetería
-              li: a(href="/sales") Ventas
+              li: a(href="/products", aria-current=currentPath === '/products' ? 'page' : null) Catálogo
+              li: a(href="/inventory", aria-current=currentPath === '/inventory' ? 'page' : null) Inventario
+              li: a(href="/cafes", aria-current=currentPath === '/cafes' ? 'page' : null) Cafetería
+              li: a(href="/sales", aria-current=currentPath === '/sales' ? 'page' : null) Ventas
             else if user.role === 'client'
-              li: a(href="/products") Catálogo de Libros
-              li: a(href="/cart") Carrito
+              li: a(href="/products", aria-current=currentPath === '/products' ? 'page' : null) Catálogo
+              li: a(href="/cafes", aria-current=currentPath === '/cafes' ? 'page' : null) Cafetería
+              li: a(href="/cart", aria-current=currentPath === '/cart' ? 'page' : null, class="cart-indicator") 
+                | Carrito
+                span.cart-count 0
             else
-              li: a(href="/products") Catálogo de Libros
-              li: a(href="/cafes") Cafetería
-            li: a(href="/logout") Cerrar sesión (#{user.email})
-          else
+              li: a(href="/cafes", aria-current=currentPath === '/cafes' ? 'page' : null) Cafetería
+            li: a(href="/logout") Cerrar sesión
+          else if currentPath !== '/login'
             li: a(href="/login") Iniciar sesión
-    main
+    main#main-content(role="main")
+      div#message-container
       block content
-    footer
-      p © #{new Date().getFullYear()} El Lector Voraz
+    footer(role="contentinfo")
+      .footer-content
+        .footer-brand
+          h2 El Lector Voraz
+          p Un espacio para los amantes de la lectura y el buen café
+        .footer-links
+          h3 Enlaces
+          ul
+            if user && (user.role === 'staff' || user.role === 'client')
+              li: a(href="/products") Catálogo
+              li: a(href="/cafes") Cafetería
+            li: a(href="/about") Nosotros
+            li: a(href="/contact") Contacto
+        .footer-contact
+          h3 Contacto
+          p
+            | Calle Librería 123
+            br
+            | Ciudad Literaria
+            br
+            | Tel: (123) 456-7890
+            br
+            | Email: info@ellectorvoraz.com
+      .footer-bottom
+        p © #{new Date().getFullYear()} El Lector Voraz. Todos los derechos reservados.

@@ -1,36 +1,97 @@
 extends layout
 
+block scripts
+  script(src="/js/cart.js", defer)
+
 block content
   h1 Catálogo de Libros
+  .page-header
+    .search-container
+      input(type="text", id="search-input", placeholder="Buscar por título o autor...", aria-label="Buscar libros")
+      button(type="button", id="search-button", aria-label="Buscar") 
+        | Buscar
 
-  .catalog-container
+  .catalog-container(role="list" aria-label="Catálogo de libros")
     each product in products
       if product.type === 'book'
-        .book-card
-          h2= product.title
-          p Autor: #{product.author}
-          p ISBN: #{product.isbn}
-          p Precio: $#{product.price}
-          p Stock: #{product.stock}
-          if product.category
-            p Categoría: #{product.category}
-          button(type="button" class="add-to-cart" data-id=product._id data-title=product.title data-price=product.price) Agregar al carrito
-          hr
+        .book-card(role="listitem")
+          .book-image
+            //- Book cover with elegant styling
+            div.book-cover
+          .book-details
+            h2= product.title
+            p.book-author 
+              em #{product.author}
+            if product.category
+              p.book-category 
+                span.label Categoría: 
+                span #{product.category}
+            p.book-isbn 
+              span.label ISBN: 
+              span #{product.isbn}
+            p.book-price $#{product.price}
+            p.book-stock(class=product.stock > 5 ? 'in-stock' : 'low-stock') 
+              span.label Stock: 
+              span #{product.stock} 
+              span.stock-label= product.stock > 5 ? ' (Disponible)' : ' (Pocas unidades)'
+            button(
+              type="button" 
+              class="add-to-cart" 
+              data-id=product._id 
+              data-title=product.title 
+              data-price=product.price
+              aria-label=`Agregar ${product.title} al carrito`
+            ) Agregar al carrito
 
   script.
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const title = this.getAttribute('data-title');
-        const price = parseFloat(this.getAttribute('data-price'));
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find(item => item.productId === id);
-        if (existing) {
-          existing.quantity += 1;
+    // Search functionality
+    document.getElementById('search-button').addEventListener('click', function() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const books = document.querySelectorAll('.book-card');
+      
+      books.forEach(book => {
+        const title = book.querySelector('h2').textContent.toLowerCase();
+        const author = book.querySelector('.book-author').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || author.includes(searchTerm)) {
+          book.style.display = '';
         } else {
-          cart.push({ productId: id, title, price, quantity: 1 });
+          book.style.display = 'none';
         }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        alert('Libro agregado al carrito: ' + title);
       });
+    });
+    
+    // Search on enter key
+    document.getElementById('search-input').addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        document.getElementById('search-button').click();
+      }
+    });
+    
+    // Add book cover placeholders with sophisticated styling
+    document.querySelectorAll('.book-cover').forEach((cover, index) => {
+      // Generate a warm color palette for book covers
+      const colors = [
+        '#8c6d62', // primary
+        '#d4a373', // secondary
+        '#e9c46a', // accent
+        '#6d5046', // primary dark
+        '#a98467', // warm brown
+        '#cb997e'  // warm tan
+      ];
+      const color = colors[index % colors.length];
+      
+      cover.style.backgroundColor = color;
+      
+      // Add first letter of book title
+      const title = cover.closest('.book-card').querySelector('h2').textContent;
+      const letter = document.createElement('span');
+      letter.textContent = title.charAt(0);
+      letter.className = 'cover-letter';
+      cover.appendChild(letter);
+      
+      // Add subtle pattern overlay for texture
+      const pattern = document.createElement('div');
+      pattern.className = 'cover-pattern';
+      cover.appendChild(pattern);
     });

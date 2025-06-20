@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'La categoría es obligatoria'],
-    enum: ['Novela', 'Ficción', 'Clasicos', 'Drama', 'Relatos']
+    enum: ['Ficción', 'Novela', 'Biografía']
   },
   consignment: {
     type: Boolean,

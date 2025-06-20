@@ -1,0 +1,87 @@
+extends layout
+
+block content
+  .confirmation-container(style="max-width: 800px; margin: 2rem auto; text-align: center; background: var(--card-bg); padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);")
+    .confirmation-icon(style="margin-bottom: 1.5rem;")
+      svg(width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: var(--success);")
+        circle(cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2")
+        path(d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+    
+    h1(style="color: var(--primary); margin-bottom: 0.5rem;") ¡Gracias por tu compra!
+    p(style="color: var(--text-light); font-size: 1.1rem; margin-bottom: 2rem;") Tu pedido ha sido procesado correctamente.
+    
+    .order-details(style="background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: var(--border-radius); margin-bottom: 2rem; text-align: left;")
+      h2(style="color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-size: 1.3rem;") Detalles del pedido
+      
+      .order-info(style="margin-bottom: 1.5rem;")
+        p(style="margin: 0.5rem 0;")
+          span(style="font-weight: 500;") Número de pedido: 
+          span#orderNumber
+        p(style="margin: 0.5rem 0;")
+          span(style="font-weight: 500;") Fecha: 
+          span#orderDate
+        p(style="margin: 0.5rem 0;")
+          span(style="font-weight: 500;") Total: 
+          span#orderTotal
+      
+      h3(style="color: var(--primary); margin-bottom: 0.75rem; font-size: 1.1rem;") Productos
+      ul#orderItems(style="list-style: none; padding: 0; margin: 0;")
+        // Will be populated by JavaScript
+    
+    p(style="color: var(--text-light); margin-bottom: 1.5rem;") Recibirás un correo electrónico con los detalles de tu compra.
+    
+    .confirmation-actions(style="display: flex; justify-content: center; gap: 1rem;")
+      a(href="/products" style="padding: 0.75rem 1.5rem; background-color: var(--secondary); color: white; text-decoration: none; border-radius: var(--border-radius);") Seguir comprando
+      a(href="/" style="padding: 0.75rem 1.5rem; background-color: var(--text-light); color: white; text-decoration: none; border-radius: var(--border-radius);") Ir al inicio
+
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get order details from session storage
+      const orderDetails = JSON.parse(sessionStorage.getItem('orderDetails') || '{}');
+      const cart = JSON.parse(sessionStorage.getItem('orderItems') || '[]');
+      
+      // If no order details, redirect to home
+      if (!orderDetails.orderNumber) {
+        window.location.href = '/';
+        return;
+      }
+      
+      // Display order details
+      document.getElementById('orderNumber').textContent = orderDetails.orderNumber;
+      document.getElementById('orderDate').textContent = orderDetails.date;
+      document.getElementById('orderTotal').textContent = `$${orderDetails.total.toFixed(2)}`;
+      
+      // Display order items
+      const orderItemsList = document.getElementById('orderItems');
+      
+      if (cart.length > 0) {
+        cart.forEach(item => {
+          const li = document.createElement('li');
+          li.style.display = 'flex';
+          li.style.justifyContent = 'space-between';
+          li.style.padding = '0.5rem 0';
+          li.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+          
+          li.innerHTML = `
+            <div>
+              <div style="font-weight: 500;">${item.title}</div>
+              <div style="font-size: 0.85rem; color: var(--text-light);">
+                ${item.type === 'book' ? 'Libro' : 'Café'} - Cantidad: ${item.quantity}
+              </div>
+            </div>
+            <div style="font-weight: 500; color: var(--primary);">$${(item.price * item.quantity).toFixed(2)}</div>
+          `;
+          
+          orderItemsList.appendChild(li);
+        });
+      } else {
+        orderItemsList.innerHTML = '<li style="text-align: center; padding: 1rem 0; color: var(--text-light);">No hay detalles disponibles</li>';
+      }
+      
+      // Clear session storage after displaying
+      // We keep it for page refreshes but will clear it when navigating away
+      window.addEventListener('beforeunload', function() {
+        sessionStorage.removeItem('orderDetails');
+        sessionStorage.removeItem('orderItems');
+      });
+    });

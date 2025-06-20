@@ -1,10 +1,15 @@
 extends layout
 
+block scripts
+  link(rel="stylesheet", href="/css/inventory.css")
+
 block content
-  h1 Inventario
+  h1 Inventario de Libros
   
-  if user && user.role === 'admin'
-    .add-book-form
+  if user && (user.role === 'admin' || user.role === 'staff')
+    button#toggleFormBtn.toggle-form-btn Agregar nuevo libro
+    
+    .add-book-form#addBookFormContainer(style="display: none;")
       h2 Agregar Nuevo Libro
       form#addBookForm(action="/api/products" method="POST")
         .form-group
@@ -29,283 +34,350 @@ block content
         
         .form-group
           label(for="category") Categoría:
-          input#category(type="text" name="category" required)
+          select#category(name="category" required)
+            option(value="") Seleccionar categoría
+            option(value="Ficción") Ficción
+            option(value="Novela") Novela
+            option(value="Biografía") Biografía
         
         button(type="submit") Agregar Libro
 
-      script.
-        document.getElementById('addBookForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          
-          const formData = {
-            title: document.getElementById('title').value,
-            author: document.getElementById('author').value,
-            isbn: document.getElementById('isbn').value,
-            price: parseFloat(document.getElementById('price').value),
-            stock: parseInt(document.getElementById('stock').value),
-            category: document.getElementById('category').value,
-            type: 'book'
-          };
-
-          try {
-            const response = await fetch('/api/products', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-              alert('Libro agregado exitosamente');
-              document.getElementById('addBookForm').reset(); // Limpiar el formulario
-              window.location.reload(); // Recargar la página para ver el nuevo libro
-            } else {
-              const data = await response.json();
-              alert('Error: ' + (data.error || 'Error al agregar el libro'));
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            alert('Error al agregar el libro');
-          }
-        });
-
-    .add-cafe-form
-      h2 Agregar Nuevo Café
-      form#addCafeForm(action="/api/cafe" method="POST")
-        .form-group
-          label(for="cafeName") Nombre:
-          input#cafeName(type="text" name="name" required)
-
-        .form-group
-          label(for="cafeCategory") Categoría:
-          select#cafeCategory(name="category" required)
-            option(value="Bebida") Bebida
-            option(value="Comida") Comida
-            option(value="Postre") Postre
-
-        .form-group
-          label(for="cafePrice") Precio:
-          input#cafePrice(type="number" name="price" step="0.01" required)
-
-        .form-group
-          label(for="cafeStock") Stock:
-          input#cafeStock(type="number" name="stock" required)
-
-        .form-group
-          label(for="cafeDescription") Descripción:
-          input#cafeDescription(type="text" name="description")
-
-        button(type="submit") Agregar Café
-
-      script.
-        document.getElementById('addCafeForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-
-          const formData = {
-            name: document.getElementById('cafeName').value,
-            category: document.getElementById('cafeCategory').value,
-            price: parseFloat(document.getElementById('cafePrice').value),
-            stock: parseInt(document.getElementById('cafeStock').value),
-            description: document.getElementById('cafeDescription').value,
-            isAvailable: true
-          };
-
-          try {
-            const response = await fetch('/api/cafe', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-voraz-key': API_KEY
-              },
-              body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-              alert('Café agregado exitosamente');
-              document.getElementById('addCafeForm').reset();
-              window.location.reload();
-            } else {
-              const data = await response.json();
-              alert('Error: ' + (data.error || 'Error al agregar el café'));
-            }
-          } catch (error) {
-            alert('Error al agregar el café');
-          }
-        });
-
   .inventory-container
     .inventory-section
-      h2 Libros
-      p Debug: #{products ? products.length : 'No hay productos'} libros encontrados
+      h2 Libros en Inventario
+      
+      .search-box
+        input#searchInput(type="text" placeholder="Buscar por título, autor o ISBN...")
+        button#searchButton(type="button") Buscar
+      
       if products && products.length > 0
-        table(border='1')
-          tr
-            th Título
-            th Autor
-            th ISBN
-            th Precio
-            th Stock
-            th Acciones
-          each product in products
+        table#booksTable
+          thead
             tr
-              td= product.title
-              td= product.author
-              td= product.isbn
-              td= product.price
-              td= product.stock
-              td
-                button(onclick=`editBook('${product.isbn}')`) Editar
-                button(onclick=`deleteBook('${product.isbn}')`) Eliminar
+              th(onclick="sortTable(0)") Título ↕
+              th(onclick="sortTable(1)") Autor ↕
+              th(onclick="sortTable(2)") ISBN ↕
+              th(onclick="sortTable(3)") Categoría ↕
+              th(onclick="sortTable(4)") Precio ↕
+              th(onclick="sortTable(5)") Stock ↕
+              th Acciones
+          tbody
+            each product in products
+              tr
+                td= product.title
+                td= product.author
+                td= product.isbn
+                td= product.category
+                td $#{product.price}
+                td= product.stock
+                td.actions
+                  button.edit-btn(onclick=`editBook('${product.isbn}')`) Editar
+                  button.delete-btn(onclick=`deleteBook('${product.isbn}')`) Eliminar
       else
-        p No hay libros en inventario.
+        .empty-state
+          p No hay libros en inventario.
+          if user && (user.role === 'admin' || user.role === 'staff')
+            p Utiliza el formulario para agregar nuevos libros.
 
-    .inventory-section
-      h2 Cafés
-      if cafes && cafes.length > 0
-        table(border='1')
-          tr
-            th Nombre
-            th Categoría
-            th Precio
-            th Stock
-            th Acciones
-          each cafe in cafes
-            tr
-              td= cafe.name
-              td= cafe.category
-              td= cafe.price
-              td= cafe.stock
-              td
-                button(onclick=`editCafe('${cafe.id}')`) Editar
-                button(onclick=`deleteCafe('${cafe.id}')`) Eliminar
-      else
-        p No hay cafés en inventario.
-
-  style.
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f7f7fa;
-      color: #222;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 2rem;
-      color: #2c3e50;
-    }
-    .add-book-form, .add-cafe-form {
-      max-width: 600px;
-      min-width: 300px;
-      width: 100vw;
-      margin-left: auto;
-      margin-right: auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-      padding: 2rem;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      box-sizing: border-box;
-    }
-    .add-book-form h2, .add-cafe-form h2 {
-      margin-top: 0;
-      color: #bfa76a;
-      text-align: center;
-      font-size: 2rem;
-      letter-spacing: 1px;
-    }
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 500;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-    .add-book-form button,
-    .add-cafe-form button {
-      background: #bfa76a !important;
-      color: #fff !important;
-      width: 100%;
-      font-size: 1.1rem;
-      margin-top: 1rem;
-      display: block;
-      border: none;
-      box-sizing: border-box;
-    }
-    button:hover {
-      background: #a68b4a;
-    }
-    .inventory-container {
-      display: flex;
-      gap: 2rem;
-      margin: 2rem 0;
-      justify-content: center;
-    }
-    .inventory-section {
-      flex: 1;
-      min-width: 0;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-      padding: 2rem;
-    }
-    .inventory-section table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-      background: #fafbfc;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .inventory-section th,
-    .inventory-section td {
-      padding: 0.7rem;
-      text-align: left;
-      border-bottom: 1px solid #eaeaea;
-    }
-    .inventory-section th {
-      background: #eaf1fb;
-      color: #bfa76a;
-      font-weight: 600;
-    }
-    .inventory-section h2 {
-      margin-bottom: 1rem;
-      color: #2c3e50;
-      text-align: center;
-    }
-    .add-book-form, .add-cafe-form {
-      margin-bottom: 2rem;
-    }
-    main {
-      margin-bottom: 6rem;
-    }
-    @media (max-width: 900px) {
-      .inventory-container {
-        flex-direction: column;
-        gap: 1rem;
-      }
-      .inventory-section {
-        padding: 1rem;
-      }
-    }
+  #editModal.modal
+    .modal-content
+      span.close-btn &times;
+      h3 Editar Libro
+      form#editBookForm
+        input#editIsbnOriginal(type="hidden")
+        .form-group
+          label(for="editTitle") Título:
+          input#editTitle(type="text")
+        
+        .form-group
+          label(for="editAuthor") Autor:
+          input#editAuthor(type="text")
+        
+        .form-group
+          label(for="editIsbn") ISBN:
+          input#editIsbn(type="text")
+        
+        .form-group
+          label(for="editPrice") Precio:
+          input#editPrice(type="number" step="0.01")
+        
+        .form-group
+          label(for="editStock") Stock:
+          input#editStock(type="number")
+        
+        .form-group
+          label(for="editCategory") Categoría:
+          select#editCategory
+            option(value="Ficción") Ficción
+            option(value="Novela") Novela
+            option(value="Biografía") Biografía
+        
+        button(type="submit") Guardar Cambios
 
   script.
     // La API key se pasa desde el backend como variable global
     const API_KEY = !{JSON.stringify(apiKey)};
+    
+    // Sort table by column
+    function sortTable(columnIndex) {
+      const table = document.getElementById('booksTable');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      // Sort the rows
+      rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        
+        // Handle price column (remove $ sign)
+        if (columnIndex === 4) {
+          aValue = parseFloat(aValue.replace('$', ''));
+          bValue = parseFloat(bValue.replace('$', ''));
+          return aValue - bValue;
+        }
+        
+        // Handle stock column (convert to number)
+        if (columnIndex === 5) {
+          return parseInt(aValue) - parseInt(bValue);
+        }
+        
+        // Default string comparison
+        return aValue.localeCompare(bValue);
+      });
+      
+      // Clear the table
+      while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+      }
+      
+      // Add sorted rows back to the table
+      rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Sort by title on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      sortTable(0);
+    });
+    
+    // Toggle form visibility
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+      const formContainer = document.getElementById('addBookFormContainer');
+      const isHidden = formContainer.style.display === 'none';
+      
+      formContainer.style.display = isHidden ? 'block' : 'none';
+      this.textContent = isHidden ? 'Ocultar formulario' : 'Agregar nuevo libro';
+    });
+    
+    // Search functionality
+    function searchBooks() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const table = document.getElementById('booksTable');
+      const rows = table.getElementsByTagName('tr');
+      
+      // Skip header row (index 0)
+      for (let i = 1; i < rows.length; i++) {
+        const title = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+        const author = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+        const isbn = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || author.includes(searchTerm) || isbn.includes(searchTerm)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+    
+    // Add event listeners for search
+    document.getElementById('searchButton').addEventListener('click', searchBooks);
+    document.getElementById('searchInput').addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        searchBooks();
+      }
+    });
+    
+    // Add book form submission
+    document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        title: document.getElementById('title').value,
+        author: document.getElementById('author').value,
+        isbn: document.getElementById('isbn').value,
+        price: parseFloat(document.getElementById('price').value),
+        stock: parseInt(document.getElementById('stock').value),
+        category: document.getElementById('category').value,
+        type: 'book'
+      };
 
-    // --------- LIBROS ---------
+      try {
+        const response = await fetch('/api/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          alert('Libro agregado exitosamente');
+          document.getElementById('addBookForm').reset();
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'Error al agregar el libro'));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar el libro');
+      }
+    });
+    
+    // Get modal elements
+    const modal = document.getElementById('editModal');
+    const closeBtn = document.querySelector('.close-btn');
+    
+    // Close modal when clicking the X
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    
+    // Edit book function - opens modal with book data
+    function editBook(isbn) {
+      // Find the book row
+      const rows = document.querySelectorAll('table tbody tr');
+      let bookRow = null;
+      
+      for (const row of rows) {
+        const isbnCell = row.querySelector('td:nth-child(3)');
+        if (isbnCell && isbnCell.textContent === isbn) {
+          bookRow = row;
+          break;
+        }
+      }
+      
+      if (!bookRow) {
+        alert('No se pudo encontrar el libro');
+        return;
+      }
+      
+      // Get book data from the row
+      const cells = bookRow.querySelectorAll('td');
+      const title = cells[0].textContent;
+      const author = cells[1].textContent;
+      const category = cells[3].textContent;
+      const price = cells[4].textContent.replace('$', '');
+      const stock = cells[5].textContent;
+      
+      // Fill the edit form
+      document.getElementById('editIsbnOriginal').value = isbn;
+      document.getElementById('editTitle').value = title;
+      document.getElementById('editAuthor').value = author;
+      document.getElementById('editIsbn').value = isbn;
+      document.getElementById('editPrice').value = price;
+      document.getElementById('editStock').value = stock;
+      
+      // Set the category dropdown
+      const categorySelect = document.getElementById('editCategory');
+      for (let i = 0; i < categorySelect.options.length; i++) {
+        if (categorySelect.options[i].value === category) {
+          categorySelect.selectedIndex = i;
+          break;
+        }
+      }
+      
+      // Show the modal
+      modal.style.display = "block";
+    }
+    
+    // Handle edit form submission
+    document.getElementById('editBookForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const originalIsbn = document.getElementById('editIsbnOriginal').value;
+      
+      // Get only the fields that have been modified
+      const formData = {};
+      
+      // Always include type
+      formData.type = 'book';
+      
+      // Check each field and only include if it has a value
+      const title = document.getElementById('editTitle').value;
+      if (title) formData.title = title;
+      
+      const author = document.getElementById('editAuthor').value;
+      if (author) formData.author = author;
+      
+      const isbn = document.getElementById('editIsbn').value;
+      if (isbn) formData.isbn = isbn;
+      
+      const price = document.getElementById('editPrice').value;
+      if (price) formData.price = parseFloat(price);
+      
+      const stock = document.getElementById('editStock').value;
+      if (stock) formData.stock = parseInt(stock);
+      
+      const category = document.getElementById('editCategory').value;
+      if (category) formData.category = category;
+      
+      // The API requires all fields, so we need to get the original data for any missing fields
+      const rows = document.querySelectorAll('table tbody tr');
+      let bookRow = null;
+      
+      for (const row of rows) {
+        const isbnCell = row.querySelector('td:nth-child(3)');
+        if (isbnCell && isbnCell.textContent === originalIsbn) {
+          bookRow = row;
+          break;
+        }
+      }
+      
+      if (bookRow) {
+        const cells = bookRow.querySelectorAll('td');
+        
+        if (!formData.title) formData.title = cells[0].textContent;
+        if (!formData.author) formData.author = cells[1].textContent;
+        if (!formData.isbn) formData.isbn = cells[2].textContent;
+        if (!formData.category) formData.category = cells[3].textContent;
+        if (!formData.price) formData.price = parseFloat(cells[4].textContent.replace('$', ''));
+        if (!formData.stock) formData.stock = parseInt(cells[5].textContent);
+      }
+      
+      try {
+        const response = await fetch(`/api/products/${originalIsbn}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-voraz-key': API_KEY
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+          alert('Libro actualizado exitosamente');
+          modal.style.display = "none";
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'No se pudo actualizar el libro'));
+        }
+      } catch (error) {
+        alert('Error al actualizar el libro');
+      }
+    });
+    
+    // Delete book function
     async function deleteBook(isbn) {
       if (!confirm('¿Seguro que quieres eliminar este libro?')) return;
+      
       try {
         const response = await fetch(`/api/products/${isbn}`, {
           method: 'DELETE',
@@ -313,6 +385,7 @@ block content
             'x-voraz-key': API_KEY
           }
         });
+        
         if (response.ok) {
           alert('Libro eliminado exitosamente');
           window.location.reload();
@@ -322,107 +395,5 @@ block content
         }
       } catch (error) {
         alert('Error al eliminar el libro');
-      }
-    }
-
-    async function editBook(isbn) {
-      const nuevoTitulo = prompt('Nuevo título:');
-      const nuevoAutor = prompt('Nuevo autor:');
-      const nuevoIsbn = prompt('Nuevo ISBN:', isbn);
-      const nuevoPrecio = prompt('Nuevo precio:');
-      const nuevoStock = prompt('Nuevo stock:');
-      const nuevaCategoria = prompt('Nueva categoría:');
-      if (
-        nuevoTitulo === null ||
-        nuevoAutor === null ||
-        nuevoIsbn === null ||
-        nuevoPrecio === null ||
-        nuevoStock === null ||
-        nuevaCategoria === null
-      ) return;
-      try {
-        const response = await fetch(`/api/products/${isbn}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-voraz-key': API_KEY
-          },
-          body: JSON.stringify({
-            title: nuevoTitulo,
-            author: nuevoAutor,
-            isbn: nuevoIsbn,
-            price: parseFloat(nuevoPrecio),
-            stock: parseInt(nuevoStock),
-            category: nuevaCategoria
-          })
-        });
-        if (response.ok) {
-          alert('Libro actualizado exitosamente');
-          window.location.reload();
-        } else {
-          const data = await response.json();
-          alert('Error: ' + (data.error || 'No se pudo actualizar el libro'));
-        }
-      } catch (error) {
-        alert('Error al actualizar el libro');
-      }
-    }
-
-    // --------- CAFÉS ---------
-    async function deleteCafe(id) {
-      if (!confirm('¿Seguro que quieres eliminar este café?')) return;
-      try {
-        const response = await fetch(`/api/cafe/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'x-voraz-key': API_KEY
-          }
-        });
-        if (response.ok) {
-          alert('Café eliminado exitosamente');
-          window.location.reload();
-        } else {
-          const data = await response.json();
-          alert('Error: ' + (data.error || 'No se pudo eliminar el café'));
-        }
-      } catch (error) {
-        alert('Error al eliminar el café');
-      }
-    }
-
-    async function editCafe(id) {
-      const nuevoNombre = prompt('Nuevo nombre:');
-      const nuevaCategoria = prompt('Nueva categoría (Bebida, Comida, Postre):');
-      const nuevoPrecio = prompt('Nuevo precio:');
-      const nuevoStock = prompt('Nuevo stock:');
-      if (
-        nuevoNombre === null ||
-        nuevaCategoria === null ||
-        nuevoPrecio === null ||
-        nuevoStock === null
-      ) return;
-      try {
-        const response = await fetch(`/api/cafe/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-voraz-key': API_KEY
-          },
-          body: JSON.stringify({
-            name: nuevoNombre,
-            category: nuevaCategoria,
-            price: parseFloat(nuevoPrecio),
-            stock: parseInt(nuevoStock)
-          })
-        });
-        if (response.ok) {
-          alert('Café actualizado exitosamente');
-          window.location.reload();
-        } else {
-          const data = await response.json();
-          alert('Error: ' + (data.error || 'No se pudo actualizar el café'));
-        }
-      } catch (error) {
-        alert('Error al actualizar el café');
       }
     }

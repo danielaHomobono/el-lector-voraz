@@ -31,6 +31,7 @@ router.get('/inventory', authMiddleware.requireAdmin, webController.inventoryPag
 router.get('/clients', authMiddleware.requireAdmin, webController.clientsPage);
 router.get('/sales', authMiddleware.requireAdmin, webController.salesPage);
 router.get('/users', authMiddleware.requireAdmin, webController.usersPage);
+router.get('/stock', authMiddleware.requireAdmin, webController.stockPage);
 
 // Ruta de logout para la web
 router.get('/logout', (req, res) => {

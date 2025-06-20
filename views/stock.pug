@@ -1,66 +1,380 @@
 extends layout
 
+block scripts
+  link(rel="stylesheet", href="/css/inventory.css")
+  link(rel="stylesheet", href="/css/stock.css")
+
 block content
   h1 Inventario de Cafetería
   
   if user && user.role === 'admin'
-    .inventory-container(style="max-width: 1200px; margin: 0 auto; padding: 1rem;")
-      .inventory-section(style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 2rem;")
-        h2(style="color: var(--secondary); margin-top: 0; margin-bottom: 1.5rem; font-weight: 400; text-align: center;") Gestión de Stock
+    button#toggleFormBtn.toggle-form-btn Agregar nuevo item
+    
+    .add-book-form#addStockFormContainer(style="display: none;")
+      h2 Agregar Nuevo Item
+      form#addStockForm
+        .form-group
+          label(for="name") Nombre:
+          input#name(type="text" name="name" required)
         
-        p(style="text-align: center; margin-bottom: 2rem;") Esta página permite gestionar el inventario de productos para la cafetería.
+        .form-group
+          label(for="type") Tipo:
+          select#type(name="type" required)
+            option(value="") Seleccionar tipo
+            option(value="food") Comida
+            option(value="beverage") Bebida
+            option(value="ingredient") Ingrediente
+            option(value="supply") Suministro
         
-        button#addItemBtn(style="display: block; margin: 0 auto; padding: 0.75rem 1.5rem; background-color: var(--secondary); color: white; border: none; border-radius: 8px; cursor: pointer;") Agregar Nuevo Item
+        .form-group
+          label(for="quantity") Cantidad:
+          input#quantity(type="number" name="quantity" required min="0")
         
-        // Sample table
-        table(style="width: 100%; border-collapse: collapse; margin-top: 2rem;")
-          thead(style="background-color: var(--primary); color: var(--highlight);")
+        .form-group
+          label(for="unit") Unidad:
+          input#unit(type="text" name="unit" required value="unidades")
+        
+        .form-group
+          label(for="minStock") Stock Mínimo:
+          input#minStock(type="number" name="minStock" required min="0" value="5")
+        
+        .form-group
+          label(for="supplier") Proveedor:
+          input#supplier(type="text" name="supplier")
+        
+        .form-group
+          label(for="notes") Notas:
+          textarea#notes(name="notes" rows="3")
+        
+        button(type="submit") Agregar Item
+
+  .inventory-container
+    .inventory-section
+      h2 Items en Inventario
+      
+      .search-box
+        input#searchInput(type="text" placeholder="Buscar por nombre o tipo...")
+        button#searchButton(type="button") Buscar
+      
+      if stockItems && stockItems.length > 0
+        table#stockTable
+          thead
             tr
-              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Nombre
-              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Tipo
-              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Cantidad
-              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Unidad
-              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Acciones
+              th(onclick="sortTable(0)") Nombre ↕
+              th(onclick="sortTable(1)") Tipo ↕
+              th(onclick="sortTable(2)") Cantidad ↕
+              th(onclick="sortTable(3)") Unidad ↕
+              th(onclick="sortTable(4)") Stock Mínimo ↕
+              th(onclick="sortTable(5)") Proveedor ↕
+              th Acciones
           tbody
-            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
-              td(style="padding: 1rem;") Café en grano
-              td(style="padding: 1rem;") Ingrediente
-              td(style="padding: 1rem;") 5
-              td(style="padding: 1rem;") kg
-              td(style="padding: 1rem;")
-                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
-                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
-            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
-              td(style="padding: 1rem;") Leche
-              td(style="padding: 1rem;") Ingrediente
-              td(style="padding: 1rem;") 10
-              td(style="padding: 1rem;") litros
-              td(style="padding: 1rem;")
-                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
-                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
-            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
-              td(style="padding: 1rem;") Croissant
-              td(style="padding: 1rem;") Comida
-              td(style="padding: 1rem;") 15
-              td(style="padding: 1rem;") unidades
-              td(style="padding: 1rem;")
-                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
-                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
-            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05); background-color: rgba(255, 152, 0, 0.1);")
-              td(style="padding: 1rem;") Azúcar
-              td(style="padding: 1rem;") Ingrediente
-              td(style="padding: 1rem; color: var(--warning); font-weight: 500;") 2
-              td(style="padding: 1rem;") kg
-              td(style="padding: 1rem;")
-                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
-                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
-            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
-              td(style="padding: 1rem;") Vasos desechables
-              td(style="padding: 1rem;") Suministro
-              td(style="padding: 1rem;") 200
-              td(style="padding: 1rem;") unidades
-              td(style="padding: 1rem;")
-                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
-                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
-  else
-    p(style="text-align: center; padding: 2rem;") No tienes permiso para acceder a esta página.
+            each item in stockItems
+              tr(class=item.quantity <= item.minStock ? 'low-stock-row' : '')
+                td= item.name
+                td= item.type === 'food' ? 'Comida' : (item.type === 'beverage' ? 'Bebida' : (item.type === 'ingredient' ? 'Ingrediente' : 'Suministro'))
+                td= item.quantity
+                td= item.unit
+                td= item.minStock
+                td= item.supplier || 'N/A'
+                td.actions
+                  button.edit-btn(onclick=`editStock('${item._id}')`) Editar
+                  button.delete-btn(onclick=`deleteStock('${item._id}')`) Eliminar
+      else
+        .empty-state
+          p No hay items en inventario.
+          if user && user.role === 'admin'
+            p Utiliza el formulario para agregar nuevos items.
+
+  #editModal.modal
+    .modal-content
+      span.close-btn &times;
+      h3 Editar Item
+      form#editStockForm
+        input#editItemId(type="hidden")
+        .form-group
+          label(for="editName") Nombre:
+          input#editName(type="text")
+        
+        .form-group
+          label(for="editType") Tipo:
+          select#editType
+            option(value="food") Comida
+            option(value="beverage") Bebida
+            option(value="ingredient") Ingrediente
+            option(value="supply") Suministro
+        
+        .form-group
+          label(for="editQuantity") Cantidad:
+          input#editQuantity(type="number" min="0")
+        
+        .form-group
+          label(for="editUnit") Unidad:
+          input#editUnit(type="text")
+        
+        .form-group
+          label(for="editMinStock") Stock Mínimo:
+          input#editMinStock(type="number" min="0")
+        
+        .form-group
+          label(for="editSupplier") Proveedor:
+          input#editSupplier(type="text")
+        
+        .form-group
+          label(for="editNotes") Notas:
+          textarea#editNotes(rows="3")
+        
+        button(type="submit") Guardar Cambios
+
+  script.
+    // La API key se pasa desde el backend como variable global
+    const API_KEY = !{JSON.stringify(apiKey || '')};
+    
+    // Sort table by column
+    function sortTable(columnIndex) {
+      const table = document.getElementById('stockTable');
+      if (!table) return;
+      
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return;
+      
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      // Sort the rows
+      rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        
+        // Handle numeric columns
+        if (columnIndex === 2 || columnIndex === 4) {
+          return parseInt(aValue) - parseInt(bValue);
+        }
+        
+        // Default string comparison
+        return aValue.localeCompare(bValue);
+      });
+      
+      // Clear the table
+      while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+      }
+      
+      // Add sorted rows back to the table
+      rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Sort by name on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      if (document.getElementById('stockTable')) {
+        sortTable(0);
+      }
+      
+      // Toggle form visibility
+      const toggleBtn = document.getElementById('toggleFormBtn');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const formContainer = document.getElementById('addStockFormContainer');
+          const isHidden = formContainer.style.display === 'none';
+          
+          formContainer.style.display = isHidden ? 'block' : 'none';
+          this.textContent = isHidden ? 'Ocultar formulario' : 'Agregar nuevo item';
+        });
+      }
+      
+      // Add event listeners for search
+      const searchBtn = document.getElementById('searchButton');
+      const searchInput = document.getElementById('searchInput');
+      
+      if (searchBtn) {
+        searchBtn.addEventListener('click', searchStock);
+      }
+      
+      if (searchInput) {
+        searchInput.addEventListener('keyup', function(event) {
+          if (event.key === 'Enter') {
+            searchStock();
+          }
+        });
+      }
+      
+      // Add stock form submission
+      const addStockForm = document.getElementById('addStockForm');
+      if (addStockForm) {
+        addStockForm.addEventListener('submit', addStockItem);
+      }
+      
+      // Edit stock form submission
+      const editStockForm = document.getElementById('editStockForm');
+      if (editStockForm) {
+        editStockForm.addEventListener('submit', updateStockItem);
+      }
+      
+      // Modal close button
+      const closeBtn = document.querySelector('.close-btn');
+      if (closeBtn) {
+        closeBtn.onclick = function() {
+          document.getElementById('editModal').style.display = "none";
+        }
+      }
+      
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+    });
+    
+    // Search functionality
+    function searchStock() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const table = document.getElementById('stockTable');
+      if (!table) return;
+      
+      const rows = table.getElementsByTagName('tr');
+      
+      // Skip header row (index 0)
+      for (let i = 1; i < rows.length; i++) {
+        const name = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+        const type = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+        
+        if (name.includes(searchTerm) || type.includes(searchTerm)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+    
+    // Add stock item
+    async function addStockItem(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value,
+        type: document.getElementById('type').value,
+        quantity: parseInt(document.getElementById('quantity').value),
+        unit: document.getElementById('unit').value,
+        minStock: parseInt(document.getElementById('minStock').value),
+        supplier: document.getElementById('supplier').value,
+        notes: document.getElementById('notes').value
+      };
+
+      try {
+        const response = await fetch('/api/cafe-stock', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-voraz-key': API_KEY
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          alert('Item agregado exitosamente');
+          document.getElementById('addStockForm').reset();
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'Error al agregar el item'));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar el item');
+      }
+    }
+    
+    // Edit stock function - opens modal with item data
+    async function editStock(id) {
+      try {
+        const response = await fetch(`/api/cafe-stock/${id}`, {
+          headers: {
+            'x-voraz-key': API_KEY
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al obtener datos del item');
+        }
+        
+        const item = await response.json();
+        
+        // Fill the edit form
+        document.getElementById('editItemId').value = item._id;
+        document.getElementById('editName').value = item.name;
+        document.getElementById('editType').value = item.type;
+        document.getElementById('editQuantity').value = item.quantity;
+        document.getElementById('editUnit').value = item.unit;
+        document.getElementById('editMinStock').value = item.minStock;
+        document.getElementById('editSupplier').value = item.supplier || '';
+        document.getElementById('editNotes').value = item.notes || '';
+        
+        // Show the modal
+        document.getElementById('editModal').style.display = "block";
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+    
+    // Update stock item
+    async function updateStockItem(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('editItemId').value;
+      
+      const formData = {
+        name: document.getElementById('editName').value,
+        type: document.getElementById('editType').value,
+        quantity: parseInt(document.getElementById('editQuantity').value),
+        unit: document.getElementById('editUnit').value,
+        minStock: parseInt(document.getElementById('editMinStock').value),
+        supplier: document.getElementById('editSupplier').value,
+        notes: document.getElementById('editNotes').value
+      };
+      
+      try {
+        const response = await fetch(`/api/cafe-stock/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-voraz-key': API_KEY
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+          alert('Item actualizado exitosamente');
+          document.getElementById('editModal').style.display = "none";
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'No se pudo actualizar el item'));
+        }
+      } catch (error) {
+        alert('Error al actualizar el item');
+      }
+    }
+    
+    // Delete stock function
+    async function deleteStock(id) {
+      if (!confirm('¿Seguro que quieres eliminar este item?')) return;
+      
+      try {
+        const response = await fetch(`/api/cafe-stock/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-voraz-key': API_KEY
+          }
+        });
+        
+        if (response.ok) {
+          alert('Item eliminado exitosamente');
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'No se pudo eliminar el item'));
+        }
+      } catch (error) {
+        alert('Error al eliminar el item');
+      }
+    }

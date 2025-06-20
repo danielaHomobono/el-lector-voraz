@@ -37,7 +37,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
@@ -67,7 +67,6 @@ app.use('/api/ventas', saleRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/cafe-stock', require('./src/routes/cafeStockRoutes'));
 
 // Rutas de vistas
 app.get('/', (req, res) => {
@@ -119,29 +118,6 @@ app.get('/products', async (req, res) => {
   } catch (error) {
     console.error('Error en /products:', error);
     res.status(500).send(`Error al cargar productos: ${error.message}`);
-  }
-});
-
-app.get('/cafes', async (req, res) => {
-  try {
-    // Check if user is logged in
-    if (!req.session.user) {
-      return res.redirect('/login');
-    }
-    
-    // Only allow staff and clients to access the cafeteria
-    if (req.session.user.role !== 'staff' && req.session.user.role !== 'client') {
-      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
-    }
-    
-    console.log('Renderizando cafes.pug');
-    const CafeProduct = require('./src/models/CafeProduct');
-    // Sort cafe products alphabetically by name
-    const cafes = await CafeProduct.find().sort({ name: 1 });
-    res.render('cafes', { title: 'Cafetería', cafes, user: req.session.user });
-  } catch (error) {
-    console.error('Error en /cafes:', error);
-    res.status(500).send(`Error al cargar cafés: ${error.message}`);
   }
 });
 
@@ -369,7 +345,7 @@ app.get('/checkout', (req, res) => {
       return res.redirect('/login');
     }
     console.log('Renderizando checkout.pug');
-    res.render('checkout', { title: 'Finalizar Compra', user: req.session.user });
+    res.render('checkout', { title: 'Finalizar Compra', user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /checkout:', error);
     res.status(500).send(`Error al cargar la página de checkout: ${error.message}`);
@@ -397,6 +373,8 @@ app.use((req, res) => {
   console.log(`Ruta no encontrada: ${req.method} ${req.url}`);
   res.status(404).send('Cannot GET');
 });
+
+console.log('API_KEY en backend:', process.env.API_KEY);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

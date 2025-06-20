@@ -1,94 +1,313 @@
 extends layout
 
 block scripts
-  link(rel="stylesheet", href="/css/cafe.css")
-  script(src="/js/cart.js", defer)
+  link(rel="stylesheet", href="/css/inventory.css")
+  link(rel="stylesheet", href="/css/stock.css")
+  script.
+    // La API key se pasa desde el backend como variable global
+    const API_KEY = !{JSON.stringify(apiKey || '')};
 
 block content
-  h1 Cafetería
-  .page-header
-    .search-container
-      input(type="text", id="search-input", placeholder="Buscar por nombre o categoría...", aria-label="Buscar productos")
-      button(type="button", id="search-button", aria-label="Buscar") 
-        | Buscar
+  h1 Inventario de Cafetería
+  
+  if user && (user.role === 'admin' || user.role === 'staff')
+    button#toggleFormBtn.toggle-form-btn Agregar nuevo producto de café
+    
+    .add-book-form#addCafeFormContainer(style="display: none;")
+      h2 Agregar Nuevo Producto de Café
+      form#addCafeForm
+        .form-group
+          label(for="name") Nombre:
+          input#name(type="text" name="name" required)
+        .form-group
+          label(for="description") Descripción:
+          input#description(type="text" name="description")
+        .form-group
+          label(for="price") Precio:
+          input#price(type="number" name="price" step="0.01" required)
+        .form-group
+          label(for="stock") Stock:
+          input#stock(type="number" name="stock" required)
+        .form-group
+          label(for="category") Categoría:
+          select#category(name="category" required)
+            option(value="") Seleccionar categoría
+            option(value="Bebida") Bebida
+            option(value="Comida") Comida
+            option(value="Postre") Postre
+        button(type="submit") Agregar Producto
 
-  .catalog-container(role="list" aria-label="Productos de cafetería")
-    each cafe in cafes
-      .book-card(role="listitem")
-        .book-image
-          //- Cafe product image placeholder
-          div.book-cover
-        .book-details
-          h2= cafe.name
-          if cafe.description
-            p.book-author 
-              em #{cafe.description}
-          p.book-category 
-            span.label Categoría: 
-            span #{cafe.category}
-          p.book-price $#{cafe.price}
-          - const isLowStock = cafe.stock <= (cafe.lowStockThreshold || 5)
-          p.book-stock(class=isLowStock ? 'low-stock' : 'in-stock') 
-            span.label Stock: 
-            span #{cafe.stock} #{cafe.stockUnit || 'unidades'}
-            span.stock-label= isLowStock ? ' (Pocas unidades)' : ' (Disponible)'
-          button(
-            type="button" 
-            class="add-to-cart" 
-            data-id=cafe.id 
-            data-title=cafe.name 
-            data-price=cafe.price
-            aria-label=`Agregar ${cafe.name} al carrito`
-            disabled=cafe.stock <= 0
-          ) #{cafe.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
+  if user && user.role === 'client'
+    .catalog-container(role="list" aria-label="Catálogo de cafetería")
+      each cafe in cafes
+        .book-card(role="listitem")
+          .book-image
+            div.book-cover
+          .book-details
+            h2= cafe.name
+            if cafe.category
+              p.book-category
+                span.label Categoría:
+                span #{cafe.category}
+            p.book-description #{cafe.description}
+            p.book-price $#{cafe.price}
+            p.book-stock(class=cafe.stock > 5 ? 'in-stock' : 'low-stock')
+              span.label Stock:
+              span #{cafe.stock}
+              span.stock-label= cafe.stock > 5 ? ' (Disponible)' : ' (Pocas unidades)'
+            button(
+              type="button"
+              class="add-to-cart"
+              data-id=cafe.id
+              data-title=cafe.name
+              data-price=cafe.price
+              aria-label=`Agregar ${cafe.name} al carrito`
+            ) Agregar al carrito
+
+  if user && (user.role === 'admin' || user.role === 'staff')
+    .inventory-container
+      .inventory-section
+        h2 Productos de Cafetería
+        
+        .search-box
+          input#searchInput(type="text" placeholder="Buscar por nombre, categoría o descripción...")
+          button#searchButton(type="button") Buscar
+        
+        if cafes && cafes.length > 0
+          table#cafesTable
+            thead
+              tr
+                th(onclick="sortTable(0)") Nombre ↕
+                th(onclick="sortTable(1)") Descripción ↕
+                th(onclick="sortTable(2)") Categoría ↕
+                th(onclick="sortTable(3)") Precio ↕
+                th(onclick="sortTable(4)") Stock ↕
+                th Acciones
+            tbody
+              each cafe in cafes
+                tr
+                  td= cafe.name
+                  td= cafe.description
+                  td= cafe.category
+                  td $#{cafe.price}
+                  td= cafe.stock
+                  td.actions
+                    button.edit-btn(type="button", onclick=`editCafe('${cafe.id}')`) Editar
+                    button.delete-btn(type="button", onclick=`deleteCafe('${cafe.id}')`) Eliminar
+        else
+          .empty-state
+            p No hay productos de cafetería en inventario.
+            if user && (user.role === 'admin' || user.role === 'staff')
+              p Utiliza el formulario para agregar nuevos productos.
+
+  #editModal.modal
+    .modal-content
+      span.close-btn &times;
+      h3 Editar Producto de Café
+      form#editCafeForm
+        input#editIdOriginal(type="hidden")
+        .form-group
+          label(for="editName") Nombre:
+          input#editName(type="text")
+        .form-group
+          label(for="editDescription") Descripción:
+          input#editDescription(type="text")
+        .form-group
+          label(for="editPrice") Precio:
+          input#editPrice(type="number" step="0.01")
+        .form-group
+          label(for="editStock") Stock:
+          input#editStock(type="number")
+        .form-group
+          label(for="editCategory") Categoría:
+          select#editCategory
+            option(value="Bebida") Bebida
+            option(value="Comida") Comida
+            option(value="Postre") Postre
+        button(type="submit") Guardar Cambios
 
   script.
-    // Search functionality
-    document.getElementById('search-button').addEventListener('click', function() {
-      const searchTerm = document.getElementById('search-input').value.toLowerCase();
-      const items = document.querySelectorAll('.book-card');
-      
-      items.forEach(item => {
-        const name = item.querySelector('h2').textContent.toLowerCase();
-        const category = item.querySelector('.book-category span:last-child').textContent.toLowerCase();
-        
-        if (name.includes(searchTerm) || category.includes(searchTerm)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
+    // Sort table by column
+    function sortTable(columnIndex) {
+      const table = document.getElementById('cafesTable');
+      if (!table) return;
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        if (columnIndex === 3) {
+          aValue = parseFloat(aValue.replace('$', ''));
+          bValue = parseFloat(bValue.replace('$', ''));
+          return aValue - bValue;
         }
+        if (columnIndex === 4) {
+          return parseInt(aValue) - parseInt(bValue);
+        }
+        return aValue.localeCompare(bValue);
       });
-    });
-    
-    // Search on enter key
-    document.getElementById('search-input').addEventListener('keyup', function(event) {
-      if (event.key === 'Enter') {
-        document.getElementById('search-button').click();
+      while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+      }
+      rows.forEach(row => tbody.appendChild(row));
+    }
+    window.addEventListener('DOMContentLoaded', function() {
+      if (document.getElementById('cafesTable')) {
+        sortTable(0);
+      }
+      // Toggle form visibility
+      const toggleBtn = document.getElementById('toggleFormBtn');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const formContainer = document.getElementById('addCafeFormContainer');
+          const isHidden = formContainer.style.display === 'none';
+          formContainer.style.display = isHidden ? 'block' : 'none';
+          this.textContent = isHidden ? 'Ocultar formulario' : 'Agregar nuevo producto de café';
+        });
+      }
+      // Add event listeners for search
+      const searchBtn = document.getElementById('searchButton');
+      const searchInput = document.getElementById('searchInput');
+      if (searchBtn) {
+        searchBtn.addEventListener('click', searchCafes);
+      }
+      if (searchInput) {
+        searchInput.addEventListener('keyup', function(event) {
+          if (event.key === 'Enter') {
+            searchCafes();
+          }
+        });
+      }
+      // Add cafe form submission
+      const addCafeForm = document.getElementById('addCafeForm');
+      if (addCafeForm) {
+        addCafeForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = {
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            price: parseFloat(document.getElementById('price').value),
+            stock: parseInt(document.getElementById('stock').value),
+            category: document.getElementById('category').value
+          };
+          try {
+            const res = await fetch('/api/cafe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-voraz-key': API_KEY },
+              body: JSON.stringify(data)
+            });
+            if (res.ok) {
+              alert('Producto agregado exitosamente');
+              window.location.reload();
+            } else {
+              const err = await res.json();
+              alert('Error: ' + (err.error || 'No se pudo agregar el producto.'));
+            }
+          } catch (err) {
+            alert('Error de red');
+          }
+        });
+      }
+      // Search functionality
+      function searchCafes() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const table = document.getElementById('cafesTable');
+        if (!table) return;
+        const rows = table.getElementsByTagName('tr');
+        for (let i = 1; i < rows.length; i++) {
+          const name = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+          const description = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+          const category = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+          if (name.includes(searchTerm) || description.includes(searchTerm) || category.includes(searchTerm)) {
+            rows[i].style.display = '';
+          } else {
+            rows[i].style.display = 'none';
+          }
+        }
       }
     });
-    
-    // Add cafe product image placeholders
-    document.querySelectorAll('.book-cover').forEach((cover, index) => {
-      // Generate colors for cafe products
-      const colors = [
-        '#ddbc95', // accent
-        '#b38867', // secondary
-        '#626d71', // primary
-        '#cdcdc0', // highlight
-      ];
-      const color = colors[index % colors.length];
-      
-      cover.style.backgroundColor = color;
-      
-      // Add first letter of product name
-      const name = cover.closest('.book-card').querySelector('h2').textContent;
-      const letter = document.createElement('span');
-      letter.textContent = name.charAt(0);
-      letter.className = 'cover-letter';
-      cover.appendChild(letter);
-      
-      // Add subtle pattern overlay for texture
-      const pattern = document.createElement('div');
-      pattern.className = 'cover-pattern';
-      cover.appendChild(pattern);
-    });
+    // Aquí puedes agregar la lógica para editar y eliminar productos usando fetch y el modal, igual que en stock.
+
+    // --- ELIMINAR PRODUCTO ---
+    window.deleteCafe = async function(id) {
+      if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
+      try {
+        const res = await fetch(`/api/cafe/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-voraz-key': API_KEY }
+        });
+        if (res.ok) {
+          alert('Producto eliminado');
+          window.location.reload();
+        } else {
+          const err = await res.json();
+          alert('Error: ' + (err.error || 'No se pudo eliminar.'));
+        }
+      } catch (err) {
+        alert('Error de red');
+      }
+    }
+
+    // --- EDITAR PRODUCTO: abrir modal y llenar datos ---
+    window.editCafe = function(id) {
+      const cafes = !window.cafesData ? Array.from(document.querySelectorAll('#cafesTable tbody tr')).map(row => ({
+        id: row.querySelector('button.edit-btn').getAttribute('onclick').match(/'([^']+)'/)[1],
+        name: row.cells[0].textContent,
+        description: row.cells[1].textContent,
+        category: row.cells[2].textContent,
+        price: row.cells[3].textContent.replace('$',''),
+        stock: row.cells[4].textContent
+      })) : window.cafesData;
+      const cafe = cafes.find(c => c.id === id);
+      if (!cafe) return alert('No se encontró el producto');
+      document.getElementById('editIdOriginal').value = cafe.id;
+      document.getElementById('editName').value = cafe.name;
+      document.getElementById('editDescription').value = cafe.description;
+      document.getElementById('editPrice').value = cafe.price;
+      document.getElementById('editStock').value = cafe.stock;
+      document.getElementById('editCategory').value = cafe.category;
+      document.getElementById('editModal').style.display = 'block';
+    }
+    // Cerrar modal
+    document.querySelector('#editModal .close-btn').onclick = function() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+    // --- ENVIAR EDICIÓN ---
+    const editCafeForm = document.getElementById('editCafeForm');
+    if (editCafeForm) {
+      editCafeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editIdOriginal').value;
+        const data = {
+          name: document.getElementById('editName').value,
+          description: document.getElementById('editDescription').value,
+          price: parseFloat(document.getElementById('editPrice').value),
+          stock: parseInt(document.getElementById('editStock').value),
+          category: document.getElementById('editCategory').value
+        };
+        try {
+          const res = await fetch(`/api/cafe/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'x-voraz-key': API_KEY },
+            body: JSON.stringify(data)
+          });
+          if (res.ok) {
+            alert('Producto actualizado exitosamente');
+            window.location.reload();
+          } else {
+            const err = await res.json();
+            alert('Error: ' + (err.error || 'No se pudo actualizar el producto.'));
+          }
+        } catch (err) {
+          alert('Error de red');
+        }
+      });
+    }
+
+    // En el formulario de agregar café:
+    // Quitar solo el bloque de 'Disponible', pero dejar el resto del formulario igual.
+    // En la tabla:
+    // Quitar solo la columna y celda de 'Disponible', pero dejar el resto igual.
+    // En el modal de edición:
+    // Quitar solo el campo de 'Disponible', pero dejar el resto igual.

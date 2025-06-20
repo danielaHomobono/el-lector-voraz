@@ -24,7 +24,7 @@ router.get('/checkout', authMiddleware.requireAuth, (req, res, next) => {
 });
 
 // Cafetería solo para staff y admin
-router.get('/cafes', authMiddleware.requireStaff, webController.cafesPage);
+router.get('/cafes', authMiddleware.requireAuth, webController.cafesPage);
 
 // Rutas de administrador
 router.get('/inventory', authMiddleware.requireAdmin, webController.inventoryPage);

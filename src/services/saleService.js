@@ -15,7 +15,7 @@ async function createSale(saleData) {
   // Mapear productos a items del modelo
   const items = saleData.products.map(item => ({
     productId: item.productId || item.isbn, // Ajustar según cómo se guarde el producto
-    type: 'book',
+    type: item.type || 'book',
     quantity: item.quantity,
     price: item.price
   }));

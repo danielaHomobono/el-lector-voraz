@@ -153,6 +153,8 @@ block content
         button(type="submit") Completar compra
   
   script.
+    // La API key se pasa desde el backend como variable global
+    const API_KEY = !{JSON.stringify(apiKey || '')};
     document.addEventListener('DOMContentLoaded', function() {
       // Populate checkout summary
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -224,7 +226,7 @@ block content
             try {
               // Create sale object
               const saleData = {
-                items: cart.map(item => ({
+                products: cart.map(item => ({
                   productId: item.productId,
                   type: item.type || 'book',
                   price: item.price,
@@ -240,7 +242,8 @@ block content
               await fetch('/api/ventas', {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  'x-voraz-key': API_KEY
                 },
                 body: JSON.stringify(saleData)
               });

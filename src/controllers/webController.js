@@ -37,44 +37,14 @@ async function productsPage(req, res) {
 async function cafesPage(req, res) {
   try {
     const CafeProduct = require('../models/CafeProduct');
-    const CafeStock = require('../models/CafeStock');
-    
-    // Get cafe products
+    // Obtener todos los productos de café ordenados por fecha de creación descendente
     const cafes = await CafeProduct.find().sort({ createdAt: -1 });
-    
-    // Get stock items
-    const stockItems = await CafeStock.find();
-    
-    // Create a map of stock items by name for quick lookup
-    const stockMap = {};
-    stockItems.forEach(item => {
-      stockMap[item.name.toLowerCase()] = item;
-    });
-    
-    // Add stock information to cafe products
-    cafes.forEach(cafe => {
-      // Try to find matching stock item by name
-      const stockItem = stockMap[cafe.name.toLowerCase()] || 
-                        stockItems.find(item => item.name.toLowerCase().includes(cafe.name.toLowerCase()) || 
-                                              cafe.name.toLowerCase().includes(item.name.toLowerCase()));
-      
-      // If found, use its quantity as stock
-      if (stockItem) {
-        cafe.stock = stockItem.quantity;
-        cafe.stockUnit = stockItem.unit;
-        cafe.lowStockThreshold = stockItem.minStock;
-      } else {
-        // Default values if no stock item found
-        cafe.stock = 10;
-        cafe.stockUnit = 'unidades';
-        cafe.lowStockThreshold = 5;
-      }
-    });
-    
-    res.render('cafes', { 
-      title: 'Cafetería',
+    console.log('Cafés traídos de la base de datos:', cafes);
+    res.render('cafes', {
+      title: 'Inventario de Cafetería',
       cafes,
-      user: req.session.user
+      user: req.session.user,
+      apiKey: process.env.API_KEY
     });
   } catch (error) {
     handleError(res, error, 500);
@@ -149,11 +119,11 @@ async function checkoutPage(req, res) {
 
 async function stockPage(req, res) {
   try {
-    const CafeStock = require('../models/CafeStock');
-    const stockItems = await CafeStock.find().sort({ name: 1 });
+    // const CafeStock = require('../models/CafeStock');
+    // const stockItems = await CafeStock.find().sort({ name: 1 });
     res.render('stock', { 
       title: 'Inventario de Cafetería',
-      stockItems,
+      stockItems: [],
       user: req.session.user,
       apiKey: process.env.API_KEY
     });

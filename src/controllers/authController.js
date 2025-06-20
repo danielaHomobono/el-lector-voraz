@@ -11,7 +11,7 @@ async function login(req, res) {
 
     if (!email || !password) {
       console.log('Faltan credenciales');
-      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+      return res.status(400).render('login', { title: 'Iniciar Sesión', error: 'Email y contraseña son requeridos' });
     }
 
     // Buscar usuario por email
@@ -19,10 +19,7 @@ async function login(req, res) {
 
     if (!user) {
       console.log('Usuario no encontrado:', email);
-      return res.status(401).json({ 
-        error: 'Credenciales inválidas',
-        message: 'Por favor, verifica tu email y contraseña'
-      });
+      return res.status(401).render('login', { title: 'Iniciar Sesión', error: 'Credenciales inválidas. Por favor, verifica tu email y contraseña' });
     }
 
     // Verificar contraseña usando bcrypt
@@ -30,10 +27,7 @@ async function login(req, res) {
     
     if (!isPasswordValid) {
       console.log('Contraseña incorrecta para:', email);
-      return res.status(401).json({ 
-        error: 'Credenciales inválidas',
-        message: 'Por favor, verifica tu email y contraseña'
-      });
+      return res.status(401).render('login', { title: 'Iniciar Sesión', error: 'Credenciales inválidas. Por favor, verifica tu email y contraseña' });
     }
 
     console.log('Login exitoso para:', user.email);
@@ -54,24 +48,15 @@ async function login(req, res) {
       }
     });
 
-    // Generar tokens JWT
-    const accessToken = generateToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    // Devolver respuesta con tokens
-    res.json({ 
-      message: 'Login exitoso', 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role 
-      },
-      accessToken,
-      refreshToken
-    });
+    // Redirigir según el rol
+    if (user.role === 'admin' || user.role === 'staff') {
+      return res.redirect('/inventory');
+    } else {
+      return res.redirect('/products');
+    }
   } catch (error) {
     console.error('Error en login:', error);
-    handleError(res, error, 500);
+    return res.status(500).render('login', { title: 'Iniciar Sesión', error: 'Error interno del servidor. Intenta de nuevo.' });
   }
 }
 

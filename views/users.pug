@@ -1,10 +1,15 @@
 extends layout
 
+block scripts
+  link(rel="stylesheet", href="/css/users.css")
+
 block content
   h1 Gestión de Usuarios
   
   if user && user.role === 'admin'
-    .add-user-form
+    button#toggleFormBtn.toggle-form-btn Agregar nuevo usuario
+    
+    .add-user-form#addUserFormContainer
       h2 Agregar Nuevo Usuario
       form#addUserForm(action="/api/users" method="POST")
         .form-group
@@ -18,234 +23,254 @@ block content
         .form-group
           label(for="userRole") Rol:
           select#userRole(name="role" required)
+            option(value="") Seleccionar rol
             option(value="admin") Admin
             option(value="staff") Staff
             option(value="client") Client
 
         button(type="submit") Agregar Usuario
 
-      script.
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
+  .inventory-container
+    .inventory-section
+      h2 Usuarios Registrados
+      
+      .search-box
+        input#searchInput(type="text" placeholder="Buscar por email o rol...")
+        button#searchButton(type="button") Buscar
+      
+      if users && users.length > 0
+        table#usersTable
+          thead
+            tr
+              th(onclick="sortTable(0)") Email ↕
+              th(onclick="sortTable(1)") Rol ↕
+              th(onclick="sortTable(2)") Estado ↕
+              th(onclick="sortTable(3)") Último Login ↕
+              th Acciones
+          tbody
+            each user in users
+              tr
+                td= user.email
+                td= user.role
+                td= user.isActive ? 'Activo' : 'Inactivo'
+                td= user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Nunca'
+                td.actions
+                  button.edit-btn(onclick=`editUser('${user.id}')`) Editar
+                  button.delete-btn(onclick=`deleteUser('${user.id}')`) Eliminar
+      else
+        .empty-state
+          p No hay usuarios registrados.
+          if user && user.role === 'admin'
+            p Utiliza el formulario para agregar nuevos usuarios.
 
-          const formData = {
-            email: document.getElementById('userEmail').value,
-            password: document.getElementById('userPassword').value,
-            role: document.getElementById('userRole').value
-          };
-
-          try {
-            const response = await fetch('/api/users', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-voraz-key': API_KEY
-              },
-              body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-              alert('Usuario agregado exitosamente');
-              document.getElementById('addUserForm').reset();
-              window.location.reload();
-            } else {
-              const data = await response.json();
-              alert('Error: ' + (data.error || 'Error al agregar el usuario'));
-            }
-          } catch (error) {
-            alert('Error al agregar el usuario');
-          }
-        });
-
-  .users-container
-    h2 Usuarios Registrados
-    if users && users.length > 0
-      table(border='1')
-        tr
-          th Email
-          th Rol
-          th Estado
-          th Último Login
-          th Acciones
-        each user in users
-          tr
-            td= user.email
-            td= user.role
-            td= user.isActive ? 'Activo' : 'Inactivo'
-            td= user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Nunca'
-            td
-              button(onclick=`editUser('${user.id}')`) Editar
-              button(onclick=`deleteUser('${user.id}')`) Eliminar
-    else
-      p No hay usuarios registrados.
-
-  style.
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f7f7fa;
-      color: #222;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 2rem;
-      color: #2c3e50;
-    }
-    .add-user-form {
-      max-width: 600px;
-      min-width: 300px;
-      width: 100vw;
-      margin-left: auto;
-      margin-right: auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-      padding: 2rem;
-      margin-top: 2rem;
-      margin-bottom: 2rem;
-      box-sizing: border-box;
-    }
-    .add-user-form h2 {
-      margin-top: 0;
-      color: #bfa76a;
-      text-align: center;
-      font-size: 2rem;
-      letter-spacing: 1px;
-    }
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 500;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    .add-user-form button {
-      background: #bfa76a !important;
-      color: #fff !important;
-      width: 100%;
-      font-size: 1.1rem;
-      margin-top: 1rem;
-      display: block;
-      border: none;
-      box-sizing: border-box;
-      padding: 0.6rem 1.2rem;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    .add-user-form button:hover {
-      background: #a68b4a !important;
-    }
-    .users-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-    .users-container h2 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 2rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-      overflow: hidden;
-    }
-    th, td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid #eaeaea;
-    }
-    th {
-      background: #eaf1fb;
-      color: #bfa76a;
-      font-weight: 600;
-    }
-    button {
-      background: #bfa76a;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      margin-right: 0.5rem;
-      transition: background 0.2s;
-      font-weight: 600;
-    }
-    button:hover {
-      background: #a68b4a;
-    }
-    main {
-      margin-bottom: 6rem;
-    }
-    @media (max-width: 768px) {
-      .add-user-form {
-        margin: 1rem;
-        padding: 1rem;
-      }
-      table {
-        font-size: 0.9rem;
-      }
-      th, td {
-        padding: 0.5rem;
-      }
-    }
+  #editModal.modal
+    .modal-content
+      span.close-btn &times;
+      h3 Editar Usuario
+      form#editUserForm
+        input#editUserId(type="hidden")
+        .form-group
+          label(for="editEmail") Email:
+          input#editEmail(type="email")
+        
+        .form-group
+          label(for="editPassword") Contraseña (dejar vacío para no cambiar):
+          input#editPassword(type="password")
+        
+        .form-group
+          label(for="editRole") Rol:
+          select#editRole
+            option(value="admin") Admin
+            option(value="staff") Staff
+            option(value="client") Client
+        
+        button(type="submit") Guardar Cambios
 
   script.
     // La API key se pasa desde el backend como variable global
     const API_KEY = !{JSON.stringify(apiKey)};
+    
+    // Sort table by column
+    function sortTable(columnIndex) {
+      const table = document.getElementById('usersTable');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      // Sort the rows
+      rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        
+        // Handle date column
+        if (columnIndex === 3) {
+          // If it's "Nunca", sort it last
+          if (aValue === 'Nunca') return 1;
+          if (bValue === 'Nunca') return -1;
+          
+          // Otherwise, convert to date and sort
+          return new Date(aValue) - new Date(bValue);
+        }
+        
+        // Default string comparison
+        return aValue.localeCompare(bValue);
+      });
+      
+      // Clear the table
+      while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+      }
+      
+      // Add sorted rows back to the table
+      rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Sort by email on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      sortTable(0);
+    });
+    
+    // Toggle form visibility
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+      const formContainer = document.getElementById('addUserFormContainer');
+      const isHidden = formContainer.style.display === 'none';
+      
+      formContainer.style.display = isHidden ? 'block' : 'none';
+      this.textContent = isHidden ? 'Ocultar formulario' : 'Agregar nuevo usuario';
+    });
+    
+    // Search functionality
+    function searchUsers() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const table = document.getElementById('usersTable');
+      const rows = table.getElementsByTagName('tr');
+      
+      // Skip header row (index 0)
+      for (let i = 1; i < rows.length; i++) {
+        const email = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+        const role = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+        
+        if (email.includes(searchTerm) || role.includes(searchTerm)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+    
+    // Add event listeners for search
+    document.getElementById('searchButton').addEventListener('click', searchUsers);
+    document.getElementById('searchInput').addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        searchUsers();
+      }
+    });
+    
+    // Add user form submission
+    document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        email: document.getElementById('userEmail').value,
+        password: document.getElementById('userPassword').value,
+        role: document.getElementById('userRole').value
+      };
 
-    // --------- USUARIOS ---------
-    async function deleteUser(id) {
-      if (!confirm('¿Seguro que quieres eliminar este usuario?')) return;
       try {
-        const response = await fetch(`/api/users/${id}`, {
-          method: 'DELETE',
+        const response = await fetch('/api/users', {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'x-voraz-key': API_KEY
-          }
+          },
+          body: JSON.stringify(formData)
         });
+
         if (response.ok) {
-          alert('Usuario eliminado exitosamente');
+          alert('Usuario agregado exitosamente');
+          document.getElementById('addUserForm').reset();
           window.location.reload();
         } else {
           const data = await response.json();
-          alert('Error: ' + (data.error || 'No se pudo eliminar el usuario'));
+          alert('Error: ' + (data.error || 'Error al agregar el usuario'));
         }
       } catch (error) {
-        alert('Error al eliminar el usuario');
+        alert('Error al agregar el usuario');
+      }
+    });
+    
+    // Get modal elements
+    const modal = document.getElementById('editModal');
+    const closeBtn = document.querySelector('.close-btn');
+    
+    // Close modal when clicking the X
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
       }
     }
-
-    async function editUser(id) {
-      const nuevoEmail = prompt('Nuevo email:');
-      const nuevoPassword = prompt('Nueva contraseña (dejar vacío para no cambiar):');
-      const nuevoRol = prompt('Nuevo rol (admin, staff, client):');
+    
+    // Edit user function - opens modal with user data
+    function editUser(id) {
+      // Find the user row
+      const rows = document.querySelectorAll('table tbody tr');
+      let userRow = null;
       
-      if (nuevoEmail === null || nuevoRol === null) return;
+      for (const row of rows) {
+        const editBtn = row.querySelector('.edit-btn');
+        if (editBtn && editBtn.getAttribute('onclick').includes(id)) {
+          userRow = row;
+          break;
+        }
+      }
+      
+      if (!userRow) {
+        alert('No se pudo encontrar el usuario');
+        return;
+      }
+      
+      // Get user data from the row
+      const cells = userRow.querySelectorAll('td');
+      const email = cells[0].textContent;
+      const role = cells[1].textContent;
+      
+      // Fill the edit form
+      document.getElementById('editUserId').value = id;
+      document.getElementById('editEmail').value = email;
+      document.getElementById('editPassword').value = '';
+      
+      // Set the role dropdown
+      const roleSelect = document.getElementById('editRole');
+      for (let i = 0; i < roleSelect.options.length; i++) {
+        if (roleSelect.options[i].value === role.toLowerCase()) {
+          roleSelect.selectedIndex = i;
+          break;
+        }
+      }
+      
+      // Show the modal
+      modal.style.display = "block";
+    }
+    
+    // Handle edit form submission
+    document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('editUserId').value;
       
       const userData = {
-        email: nuevoEmail,
-        role: nuevoRol
+        email: document.getElementById('editEmail').value,
+        role: document.getElementById('editRole').value
       };
       
-      if (nuevoPassword && nuevoPassword.trim() !== '') {
-        userData.password = nuevoPassword;
+      // Only include password if it's not empty
+      const password = document.getElementById('editPassword').value;
+      if (password && password.trim() !== '') {
+        userData.password = password;
       }
       
       try {
@@ -257,8 +282,10 @@ block content
           },
           body: JSON.stringify(userData)
         });
+        
         if (response.ok) {
           alert('Usuario actualizado exitosamente');
+          modal.style.display = "none";
           window.location.reload();
         } else {
           const data = await response.json();
@@ -266,5 +293,29 @@ block content
         }
       } catch (error) {
         alert('Error al actualizar el usuario');
+      }
+    });
+    
+    // Delete user function
+    async function deleteUser(id) {
+      if (!confirm('¿Seguro que quieres eliminar este usuario?')) return;
+      
+      try {
+        const response = await fetch(`/api/users/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-voraz-key': API_KEY
+          }
+        });
+        
+        if (response.ok) {
+          alert('Usuario eliminado exitosamente');
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('Error: ' + (data.error || 'No se pudo eliminar el usuario'));
+        }
+      } catch (error) {
+        alert('Error al eliminar el usuario');
       }
     }

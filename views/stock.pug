@@ -1,0 +1,66 @@
+extends layout
+
+block content
+  h1 Inventario de Cafetería
+  
+  if user && user.role === 'admin'
+    .inventory-container(style="max-width: 1200px; margin: 0 auto; padding: 1rem;")
+      .inventory-section(style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 2rem;")
+        h2(style="color: var(--secondary); margin-top: 0; margin-bottom: 1.5rem; font-weight: 400; text-align: center;") Gestión de Stock
+        
+        p(style="text-align: center; margin-bottom: 2rem;") Esta página permite gestionar el inventario de productos para la cafetería.
+        
+        button#addItemBtn(style="display: block; margin: 0 auto; padding: 0.75rem 1.5rem; background-color: var(--secondary); color: white; border: none; border-radius: 8px; cursor: pointer;") Agregar Nuevo Item
+        
+        // Sample table
+        table(style="width: 100%; border-collapse: collapse; margin-top: 2rem;")
+          thead(style="background-color: var(--primary); color: var(--highlight);")
+            tr
+              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Nombre
+              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Tipo
+              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Cantidad
+              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Unidad
+              th(style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);") Acciones
+          tbody
+            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
+              td(style="padding: 1rem;") Café en grano
+              td(style="padding: 1rem;") Ingrediente
+              td(style="padding: 1rem;") 5
+              td(style="padding: 1rem;") kg
+              td(style="padding: 1rem;")
+                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
+                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
+            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
+              td(style="padding: 1rem;") Leche
+              td(style="padding: 1rem;") Ingrediente
+              td(style="padding: 1rem;") 10
+              td(style="padding: 1rem;") litros
+              td(style="padding: 1rem;")
+                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
+                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
+            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
+              td(style="padding: 1rem;") Croissant
+              td(style="padding: 1rem;") Comida
+              td(style="padding: 1rem;") 15
+              td(style="padding: 1rem;") unidades
+              td(style="padding: 1rem;")
+                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
+                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
+            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05); background-color: rgba(255, 152, 0, 0.1);")
+              td(style="padding: 1rem;") Azúcar
+              td(style="padding: 1rem;") Ingrediente
+              td(style="padding: 1rem; color: var(--warning); font-weight: 500;") 2
+              td(style="padding: 1rem;") kg
+              td(style="padding: 1rem;")
+                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
+                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
+            tr(style="border-bottom: 1px solid rgba(0,0,0,0.05);")
+              td(style="padding: 1rem;") Vasos desechables
+              td(style="padding: 1rem;") Suministro
+              td(style="padding: 1rem;") 200
+              td(style="padding: 1rem;") unidades
+              td(style="padding: 1rem;")
+                button(style="padding: 0.5rem 1rem; background-color: var(--accent); color: var(--primary); font-weight: bold; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;") Editar
+                button(style="padding: 0.5rem 1rem; background-color: #C43B3B; color: white; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;") Eliminar
+  else
+    p(style="text-align: center; padding: 2rem;") No tienes permiso para acceder a esta página.

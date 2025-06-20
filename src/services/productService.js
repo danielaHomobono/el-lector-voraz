@@ -13,6 +13,14 @@ async function getProducts() {
   }
 }
 
+async function getSortedBooks() {
+  try {
+    return await Product.find({ type: 'book' }).sort({ title: 1 });
+  } catch (error) {
+    throw new Error('Error al obtener libros ordenados: ' + error.message);
+  }
+}
+
 async function createProduct(productData) {
   try {
     if (productData.type === 'cafe') {
@@ -102,4 +110,4 @@ async function deleteProduct(id) {
   }
 }
 
-module.exports = { getProducts, createProduct, updateProduct, deleteProduct };
+module.exports = { getProducts, getSortedBooks, createProduct, updateProduct, deleteProduct };

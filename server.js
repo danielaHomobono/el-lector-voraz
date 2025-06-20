@@ -46,9 +46,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Middleware para pasar el usuario a todas las vistas
+// Middleware para pasar el usuario y la ruta actual a todas las vistas
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
+  res.locals.currentPath = req.path;
   next();
 });
 
@@ -66,6 +67,7 @@ app.use('/api/ventas', saleRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/cafe-stock', require('./src/routes/cafeStockRoutes'));
 
 // Rutas de vistas
 app.get('/', (req, res) => {
@@ -84,14 +86,11 @@ app.get('/login', (req, res) => {
 app.get('/inventory', async (req, res) => {
   try {
     console.log('Renderizando inventory.pug');
-    const Product = require('./src/models/Product');
-    const CafeProduct = require('./src/models/CafeProduct');
-    const products = await Product.find();
-    const cafes = await CafeProduct.find();
-    console.log('Productos encontrados en MongoDB:', products.length);
-    console.log('Cafés encontrados en MongoDB:', cafes.length);
-    console.log('Productos:', products.map(p => ({ title: p.title, type: p.type })));
-    res.render('inventory', { title: 'Inventario', products, cafes, user: req.session.user, apiKey: process.env.API_KEY });
+    const productService = require('./src/services/productService');
+    // Fetch books sorted alphabetically by title
+    const products = await productService.getSortedBooks();
+    console.log('Libros encontrados en MongoDB:', products.length);
+    res.render('inventory', { title: 'Inventario de Libros', products, user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /inventory:', error);
     res.status(500).send(`Error al cargar inventario: ${error.message}`);
@@ -100,12 +99,22 @@ app.get('/inventory', async (req, res) => {
 
 app.get('/products', async (req, res) => {
   try {
+    // Check if user is logged in and has appropriate role
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    // Only allow staff and clients to access the catalog
+    if (req.session.user.role !== 'staff' && req.session.user.role !== 'client') {
+      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
+    }
+    
     console.log('Renderizando products.pug');
     if (!fs.existsSync(path.join(__dirname, 'views/products.pug'))) {
       throw new Error('products.pug no encontrado en views/');
     }
     const Product = require('./src/models/Product');
-    const products = await Product.find({ type: 'book' });
+    const products = await Product.find({ type: 'book' }).sort({ title: 1 });
     res.render('products', { title: 'Catálogo de Libros', products, user: req.session.user });
   } catch (error) {
     console.error('Error en /products:', error);
@@ -115,9 +124,20 @@ app.get('/products', async (req, res) => {
 
 app.get('/cafes', async (req, res) => {
   try {
+    // Check if user is logged in
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    // Only allow staff and clients to access the cafeteria
+    if (req.session.user.role !== 'staff' && req.session.user.role !== 'client') {
+      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
+    }
+    
     console.log('Renderizando cafes.pug');
     const CafeProduct = require('./src/models/CafeProduct');
-    const cafes = await CafeProduct.find();
+    // Sort cafe products alphabetically by name
+    const cafes = await CafeProduct.find().sort({ name: 1 });
     res.render('cafes', { title: 'Cafetería', cafes, user: req.session.user });
   } catch (error) {
     console.error('Error en /cafes:', error);
@@ -129,7 +149,8 @@ app.get('/clients', async (req, res) => {
   try {
     console.log('Renderizando clients.pug');
     const Client = require('./src/models/Client');
-    const clients = await Client.find();
+    // Sort clients alphabetically by name
+    const clients = await Client.find().sort({ name: 1 });
     res.render('clients', { title: 'Clientes', clients, user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /clients:', error);
@@ -139,10 +160,134 @@ app.get('/clients', async (req, res) => {
 
 app.get('/sales', async (req, res) => {
   try {
+    // Check if user is logged in and has appropriate role
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    // Only allow admin and staff to access the sales page
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'staff') {
+      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
+    }
+    
     console.log('Renderizando sales.pug');
     const Sale = require('./src/models/Sale');
-    const sales = await Sale.find().sort({ createdAt: -1 });
-    res.render('sales', { title: 'Ventas', sales, user: req.session.user });
+    const Product = require('./src/models/Product');
+    const CafeProduct = require('./src/models/CafeProduct');
+    const Client = require('./src/models/Client');
+    const User = require('./src/models/User');
+    
+    // Get all sales sorted by creation date (newest first)
+    // Using createdAt ensures we get the most recent sales even if date field is missing
+    const sales = await Sale.find().sort({ createdAt: -1 }).lean();
+    
+    // Get all products, clients, and users for reference
+    const products = await Product.find().lean();
+    const cafeProducts = await CafeProduct.find().lean();
+    const clients = await Client.find().lean();
+    const users = await User.find().lean();
+    
+    // Create lookup maps
+    const productMap = {};
+    products.forEach(product => {
+      productMap[product._id] = {
+        name: product.title,
+        type: 'book',
+        price: product.price
+      };
+    });
+    
+    cafeProducts.forEach(cafe => {
+      productMap[cafe._id] = {
+        name: cafe.name,
+        type: 'cafe',
+        price: cafe.price
+      };
+    });
+    
+    const clientMap = {};
+    clients.forEach(client => {
+      clientMap[client._id] = {
+        name: client.name,
+        email: client.email,
+        points: client.points || 0
+      };
+    });
+    
+    const userMap = {};
+    users.forEach(user => {
+      userMap[user._id] = user.email;
+    });
+    
+    // Calculate summary statistics
+    let totalRevenue = 0;
+    let totalItems = 0;
+    let bookSales = 0;
+    let cafeSales = 0;
+    
+    // Enhance sales with product and client details
+    sales.forEach(sale => {
+      // Add client name and details
+      if (sale.clientId && clientMap[sale.clientId]) {
+        sale.clientName = clientMap[sale.clientId].name;
+        sale.clientEmail = clientMap[sale.clientId].email;
+        sale.clientPoints = clientMap[sale.clientId].points;
+      }
+      
+      // Add staff/user who processed the sale
+      if (sale.userId && userMap[sale.userId]) {
+        sale.userEmail = userMap[sale.userId];
+      }
+      
+      // Add product details to items and calculate totals
+      let saleItemCount = 0;
+      if (sale.items && sale.items.length > 0) {
+        sale.items.forEach(item => {
+          if (item.productId && productMap[item.productId]) {
+            item.productName = productMap[item.productId].name;
+            item.productType = productMap[item.productId].type;
+            
+            // Count items by type
+            if (item.productType === 'book') {
+              bookSales += item.quantity || 1;
+            } else if (item.productType === 'cafe') {
+              cafeSales += item.quantity || 1;
+            }
+            
+            saleItemCount += item.quantity || 1;
+          }
+        });
+      }
+      
+      // Add item count to sale
+      sale.itemCount = saleItemCount;
+      totalItems += saleItemCount;
+      
+      // Add to total revenue
+      totalRevenue += sale.total || 0;
+      
+      // Ensure date is properly formatted
+      if (!sale.date) {
+        sale.date = sale.createdAt || new Date();
+      }
+    });
+    
+    // Calculate average sale value
+    const averageSaleValue = sales.length > 0 ? totalRevenue / sales.length : 0;
+    
+    res.render('sales', { 
+      title: 'Ventas', 
+      sales,
+      summary: {
+        totalSales: sales.length,
+        totalRevenue,
+        totalItems,
+        bookSales,
+        cafeSales,
+        averageSaleValue
+      },
+      user: req.session.user 
+    });
   } catch (error) {
     console.error('Error en /sales:', error);
     res.status(500).send(`Error al cargar ventas: ${error.message}`);
@@ -153,7 +298,8 @@ app.get('/users', async (req, res) => {
   try {
     console.log('Renderizando users.pug');
     const User = require('./src/models/User');
-    const users = await User.find();
+    // Sort users alphabetically by email
+    const users = await User.find().sort({ email: 1 });
     res.render('users', { title: 'Usuarios', users, user: req.session.user, apiKey: process.env.API_KEY });
   } catch (error) {
     console.error('Error en /users:', error);
@@ -163,13 +309,105 @@ app.get('/users', async (req, res) => {
 
 app.get('/financial', async (req, res) => {
   try {
+    // Check if user is logged in and has appropriate role
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    // Only allow admin to access the financial reports
+    if (req.session.user.role !== 'admin') {
+      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
+    }
+    
     console.log('Renderizando financial.pug');
     const reportService = require('./src/services/reportService');
     const report = await reportService.generateSalesReport();
-    res.render('financial', { title: 'Reporte Financiero', report, user: req.session.user });
+    
+    // Add product types summary to the report
+    if (report && report.report && report.report.length > 0) {
+      const productTypes = {};
+      
+      report.report.forEach(day => {
+        Object.entries(day.salesByType || {}).forEach(([type, count]) => {
+          if (!productTypes[type]) {
+            productTypes[type] = 0;
+          }
+          productTypes[type] += count;
+        });
+      });
+      
+      report.summary.productTypes = productTypes;
+    }
+    
+    res.render('financial', { 
+      title: 'Reporte Financiero', 
+      report, 
+      user: req.session.user 
+    });
   } catch (error) {
     console.error('Error en /financial-report:', error);
     res.status(500).send(`Error al generar el reporte financiero: ${error.message}`);
+  }
+});
+
+app.get('/stock', (req, res) => {
+  try {
+    // Check if user is logged in and has appropriate role
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    // Only allow admin to access the stock page
+    if (req.session.user.role !== 'admin') {
+      return res.status(403).send('Acceso denegado: No tienes permiso para ver esta página');
+    }
+    
+    console.log('Renderizando stock.pug');
+    res.render('stock', { 
+      title: 'Inventario de Cafetería', 
+      user: req.session.user
+    });
+  } catch (error) {
+    console.error('Error en /stock:', error);
+    res.status(500).send(`Error al cargar el inventario de cafetería: ${error.message}`);
+  }
+});
+
+app.get('/cart', (req, res) => {
+  try {
+    console.log('Renderizando cart.pug');
+    res.render('cart', { title: 'Carrito de Compras', user: req.session.user });
+  } catch (error) {
+    console.error('Error en /cart:', error);
+    res.status(500).send(`Error al cargar el carrito: ${error.message}`);
+  }
+});
+
+app.get('/checkout', (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    console.log('Renderizando checkout.pug');
+    res.render('checkout', { title: 'Finalizar Compra', user: req.session.user });
+  } catch (error) {
+    console.error('Error en /checkout:', error);
+    res.status(500).send(`Error al cargar la página de checkout: ${error.message}`);
+  }
+});
+
+app.get('/confirmation', (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    console.log('Renderizando confirmation.pug');
+    res.render('confirmation', { title: 'Confirmación de Compra', user: req.session.user });
+  } catch (error) {
+    console.error('Error en /confirmation:', error);
+    res.status(500).send(`Error al cargar la página de confirmación: ${error.message}`);
   }
 });
 

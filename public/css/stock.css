@@ -1,0 +1,15 @@
+/* Stock page specific styles */
+
+.low-stock-row {
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+.low-stock-row td {
+  color: var(--warning);
+  font-weight: 500;
+}
+
+/* Override some inventory styles */
+.inventory-section h2 {
+  color: var(--secondary);
+}

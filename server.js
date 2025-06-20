@@ -66,6 +66,193 @@ const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 console.log('Archivos estáticos servidos desde:', publicPath);
 
+// --- SOCKET.IO CHAT SOPORTE ---
+// Mapear sockets por usuario y tipo
+const connectedUsers = {
+  clients: new Map(),
+  support: new Map()
+};
+
+io.on('connection', (socket) => {
+  console.log('Nueva conexión Socket.IO:', socket.id);
+
+  // Cliente se conecta
+  socket.on('client_connect', (data) => {
+    console.log('Cliente conectado:', data.username);
+    
+    // Validar y asegurar que username tenga un valor válido
+    if (!data.username || data.username.trim() === '') {
+      data.username = 'Cliente';
+    }
+    
+    connectedUsers.clients.set(data.userId, {
+      socket: socket,
+      userData: data
+    });
+    
+    // Notificar a todos los soportes
+    connectedUsers.support.forEach((supportData, supportId) => {
+      supportData.socket.emit('clients_update', {
+        clients: Array.from(connectedUsers.clients.values()).map(client => ({
+          id: client.userData.userId,
+          username: client.userData.username || 'Cliente',
+          online: true
+        }))
+      });
+    });
+  });
+
+  // Soporte se conecta
+  socket.on('support_connect', (data) => {
+    console.log('Soporte conectado:', data.username);
+    
+    // Validar y asegurar que username tenga un valor válido
+    if (!data.username || data.username.trim() === '') {
+      data.username = 'Soporte';
+    }
+    
+    connectedUsers.support.set(data.userId, {
+      socket: socket,
+      userData: data
+    });
+    
+    // Enviar lista de clientes al soporte
+    socket.emit('clients_update', {
+      clients: Array.from(connectedUsers.clients.values()).map(client => ({
+        id: client.userData.userId,
+        username: client.userData.username || 'Cliente',
+        online: true
+      }))
+    });
+  });
+
+  // Cliente envía mensaje
+  socket.on('client_message', (data) => {
+    console.log('Mensaje de cliente:', data.message);
+    
+    // Enviar a todos los soportes
+    connectedUsers.support.forEach((supportData, supportId) => {
+      supportData.socket.emit('client_message', {
+        clientId: data.userId,
+        username: data.username || 'Cliente',
+        message: data.message,
+        timestamp: new Date().toISOString()
+      });
+    });
+  });
+
+  // Soporte envía mensaje
+  socket.on('support_message', (data) => {
+    console.log('Mensaje de soporte recibido:', {
+      message: data.message,
+      clientId: data.clientId,
+      supportId: data.supportId,
+      supportName: data.supportName
+    });
+    
+    // Enviar al cliente específico
+    const clientData = connectedUsers.clients.get(data.clientId);
+    if (clientData) {
+      console.log('Enviando mensaje al cliente:', data.clientId);
+      clientData.socket.emit('message_received', {
+        message: data.message,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      console.log('Cliente no encontrado:', data.clientId);
+      console.log('Clientes conectados:', Array.from(connectedUsers.clients.keys()));
+    }
+  });
+
+  // Cliente escribiendo
+  socket.on('client_typing', (data) => {
+    connectedUsers.support.forEach((supportData, supportId) => {
+      supportData.socket.emit('client_typing', {
+        clientId: data.userId
+      });
+    });
+  });
+
+  // Cliente deja de escribir
+  socket.on('client_stop_typing', (data) => {
+    connectedUsers.support.forEach((supportData, supportId) => {
+      supportData.socket.emit('client_stop_typing', {
+        clientId: data.userId
+      });
+    });
+  });
+
+  // Soporte escribiendo
+  socket.on('support_typing', (data) => {
+    const clientData = connectedUsers.clients.get(data.clientId);
+    if (clientData) {
+      clientData.socket.emit('typing_start');
+    }
+  });
+
+  // Soporte deja de escribir
+  socket.on('support_stop_typing', (data) => {
+    const clientData = connectedUsers.clients.get(data.clientId);
+    if (clientData) {
+      clientData.socket.emit('typing_stop');
+    }
+  });
+
+  // Finalizar chat
+  socket.on('end_chat', (data) => {
+    const clientData = connectedUsers.clients.get(data.clientId);
+    if (clientData) {
+      clientData.socket.emit('chat_ended');
+    }
+  });
+
+  // Solicitar actualización de clientes
+  socket.on('request_clients_update', () => {
+    socket.emit('clients_update', {
+      clients: Array.from(connectedUsers.clients.values()).map(client => ({
+        id: client.userData.userId,
+        username: client.userData.username || 'Cliente',
+        online: true
+      }))
+    });
+  });
+
+  // Desconexión
+  socket.on('disconnect', () => {
+    console.log('Desconexión Socket.IO:', socket.id);
+    
+    // Remover de clientes
+    for (const [userId, clientData] of connectedUsers.clients.entries()) {
+      if (clientData.socket.id === socket.id) {
+        connectedUsers.clients.delete(userId);
+        console.log('Cliente desconectado:', clientData.userData.username);
+        break;
+      }
+    }
+    
+    // Remover de soporte
+    for (const [userId, supportData] of connectedUsers.support.entries()) {
+      if (supportData.socket.id === socket.id) {
+        connectedUsers.support.delete(userId);
+        console.log('Soporte desconectado:', supportData.userData.username);
+        break;
+      }
+    }
+    
+    // Actualizar lista para todos los soportes
+    connectedUsers.support.forEach((supportData, supportId) => {
+      supportData.socket.emit('clients_update', {
+        clients: Array.from(connectedUsers.clients.values()).map(client => ({
+          id: client.userData.userId,
+          username: client.userData.username || 'Cliente',
+          online: true
+        }))
+      });
+    });
+  });
+});
+// --- FIN SOCKET.IO CHAT SOPORTE ---
+
 // Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);

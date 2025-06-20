@@ -24,17 +24,20 @@ html(lang="es")
               li: a(href="/sales", aria-current=currentPath === '/sales' ? 'page' : null) Ventas
               li: a(href="/users", aria-current=currentPath === '/users' ? 'page' : null) Usuarios
               li: a(href="/financial", aria-current=currentPath === '/financial' ? 'page' : null) Reportes
+              li: a(href="/support", aria-current=currentPath === '/support' ? 'page' : null) Soporte
             else if user.role === 'staff'
               li: a(href="/products", aria-current=currentPath === '/products' ? 'page' : null) Catálogo
               li: a(href="/inventory", aria-current=currentPath === '/inventory' ? 'page' : null) Inventario
               li: a(href="/cafes", aria-current=currentPath === '/cafes' ? 'page' : null) Cafetería
               li: a(href="/sales", aria-current=currentPath === '/sales' ? 'page' : null) Ventas
+              li: a(href="/support", aria-current=currentPath === '/support' ? 'page' : null) Soporte
             else if user.role === 'client'
               li: a(href="/products", aria-current=currentPath === '/products' ? 'page' : null) Catálogo
               li: a(href="/cafes", aria-current=currentPath === '/cafes' ? 'page' : null) Cafetería
               li: a(href="/cart", aria-current=currentPath === '/cart' ? 'page' : null, class="cart-indicator") 
                 | Carrito
                 span.cart-count 0
+              li: a(href="/chat", aria-current=currentPath === '/chat' ? 'page' : null) Chat Soporte
             li: a(href="/logout") Cerrar sesión
           else
             if currentPath !== '/login'
@@ -53,6 +56,10 @@ html(lang="es")
             if user && (user.role === 'staff' || user.role === 'client')
               li: a(href="/products") Catálogo
               li: a(href="/cafes") Cafetería
+            if user && user.role === 'client'
+              li: a(href="/chat") Chat de Soporte
+            if user && (user.role === 'admin' || user.role === 'staff')
+              li: a(href="/support") Panel de Soporte
             li: a(href="/about") Nosotros
             li: a(href="/contact") Contacto
         .footer-contact

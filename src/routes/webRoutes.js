@@ -26,6 +26,21 @@ router.get('/checkout', authMiddleware.requireAuth, (req, res, next) => {
 // Cafetería solo para staff y admin
 router.get('/cafes', authMiddleware.requireAuth, webController.cafesPage);
 
+// Rutas del chat
+router.get('/chat', authMiddleware.requireAuth, (req, res, next) => {
+  if (req.session.user && req.session.user.role === 'client') {
+    return webController.chatPage(req, res, next);
+  }
+  return res.status(403).render('error', { title: 'Acceso Denegado', message: 'Solo clientes pueden acceder al chat de soporte' });
+});
+
+router.get('/support', authMiddleware.requireAuth, (req, res, next) => {
+  if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'staff')) {
+    return webController.supportPage(req, res, next);
+  }
+  return res.status(403).render('error', { title: 'Acceso Denegado', message: 'Solo administradores y staff pueden acceder al panel de soporte' });
+});
+
 // Rutas de administrador
 router.get('/inventory', authMiddleware.requireAdmin, webController.inventoryPage);
 router.get('/clients', authMiddleware.requireAdmin, webController.clientsPage);

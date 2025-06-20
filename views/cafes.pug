@@ -86,14 +86,6 @@ block content
               span.label Stock:
               span #{cafe.stock}
               span.stock-label= cafe.stock > 5 ? ' (Disponible)' : ' (Pocas unidades)'
-            button(
-              type="button"
-              class="add-to-cart"
-              data-id=cafe.id
-              data-title=cafe.name
-              data-price=cafe.price
-              aria-label=`Agregar ${cafe.name} al carrito`
-            ) Agregar al carrito
 
   if user && (user.role === 'admin' || user.role === 'staff')
     .inventory-container

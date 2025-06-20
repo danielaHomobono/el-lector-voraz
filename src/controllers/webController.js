@@ -133,6 +133,44 @@ async function stockPage(req, res) {
   }
 }
 
+async function chatPage(req, res) {
+  try {
+    // Preparar datos del usuario para el frontend
+    const userData = {
+      id: req.session.user._id,
+      username: req.session.user.username,
+      role: req.session.user.role
+    };
+
+    res.render('chat', { 
+      title: 'Chat de Soporte',
+      user: req.session.user,
+      userData: JSON.stringify(userData)
+    });
+  } catch (error) {
+    handleError(res, error, 500);
+  }
+}
+
+async function supportPage(req, res) {
+  try {
+    // Preparar datos del usuario para el frontend
+    const userData = {
+      id: req.session.user._id,
+      username: req.session.user.username,
+      role: req.session.user.role
+    };
+
+    res.render('support', { 
+      title: 'Panel de Soporte',
+      user: req.session.user,
+      userData: JSON.stringify(userData)
+    });
+  } catch (error) {
+    handleError(res, error, 500);
+  }
+}
+
 module.exports = {
   loginPage,
   homePage,
@@ -144,5 +182,7 @@ module.exports = {
   usersPage,
   cartPage,
   checkoutPage,
-  stockPage
+  stockPage,
+  chatPage,
+  supportPage
 };

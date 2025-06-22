@@ -10,9 +10,6 @@ Esta aplicación web permite administrar el inventario, ventas, clientes y repor
 
 ### Experiencia de Usuario
 - **Tema Claro/Oscuro**: Cambio de tema según preferencia del usuario
-- **Animaciones**: Transiciones suaves y efectos visuales para mejor experiencia
-- **Lazy Loading**: Carga diferida de imágenes para mejor rendimiento
-- **Validación de Formularios**: Validación en tiempo real de entradas de usuario
 - **Diseño Responsivo**: Adaptación a diferentes tamaños de pantalla
 - **Accesibilidad**: Implementación de atributos ARIA y buenas prácticas
 
@@ -61,14 +58,11 @@ Esta aplicación web permite administrar el inventario, ventas, clientes y repor
 ### Características Técnicas
 - **API RESTful**: Endpoints completos para todas las funcionalidades
 - **Seguridad API**: Autenticación con API Key para endpoints protegidos
-- **Validación de datos**: Validación completa de formularios y datos (cliente y servidor)
-- **Manejo de errores**: Sistema robusto de manejo de errores con feedback visual
+- **Manejo de errores**: Sistema robusto de manejo de errores
 - **Interfaz responsiva**: Diseño adaptativo para móviles y desktop
 - **Accesibilidad**: Implementación de estándares de accesibilidad web
-- **Optimización de rendimiento**: Minificación de CSS, lazy loading de imágenes
-- **Documentación de código**: Comentarios JSDoc en funciones clave
+- **Optimización de rendimiento**: Minificación de CSS
 - **Guía de estilos**: Sistema de diseño coherente con variables CSS
-- **Pruebas automatizadas**: Tests unitarios e integración con Jest y Supertest
 
 ## Requisitos
 
@@ -120,28 +114,7 @@ npm run build:prod
 4. Cambiar entre tema claro y oscuro:
 - Usar el botón de cambio de tema en la barra de navegación
 
-## Pruebas
 
-1. Ejecutar todas las pruebas:
-```bash
-npm test
-```
-
-2. Ejecutar pruebas en modo observador (para desarrollo):
-```bash
-npm run test:watch
-```
-
-3. Ejecutar pruebas con cobertura:
-```bash
-npm run test:coverage
-```
-
-### Estructura de pruebas
-
-- `__tests__/unit/`: Pruebas unitarias para funciones y utilidades
-- `__tests__/integration/`: Pruebas de integración para rutas y controladores
-- `__tests__/mocks/`: Datos de prueba y mocks
 
 ## Credenciales de Prueba
 
@@ -296,7 +269,6 @@ npm run test:coverage
 - **CSS3** - Estilos y diseño responsivo
 - **Chart.js** - Gráficos para reportes
 - **Socket.IO Client** - Cliente para comunicación en tiempo real
-- **Intersection Observer API** - Lazy loading de imágenes
 
 ## Guía de Estilos
 
@@ -305,7 +277,6 @@ El proyecto utiliza una guía de estilos centralizada para mantener la coherenci
 ### Características de Diseño
 - **Tema Claro/Oscuro** - Soporte para cambio de tema
 - **Diseño Responsivo** - Adaptable a dispositivos móviles y desktop
-- **Animaciones Sutiles** - Mejoran la experiencia de usuario
 - **Accesibilidad** - Implementación de ARIA y buenas prácticas
 
 ### Estructura CSS

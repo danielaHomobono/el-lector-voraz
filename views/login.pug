@@ -1,12 +1,6 @@
 extends layout
 
 block scripts
-  script(src="/js/validation.js", defer)
-  script.
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize form validation
-      window.FormValidator.initFormValidation('login-form');
-    });
 
 block content
   .login-container
@@ -23,14 +17,14 @@ block content
     if error
       .message.error= error
 
-    form#login-form(action="/api/auth/login" method="POST" novalidate)
+    form#login-form(action="/api/auth/login" method="POST")
       .form-group
         label(for="email") Email:
-        input#email(type="email" name="email" required aria-required="true" placeholder="tu@email.com")
+        input#email(type="email" name="email" required placeholder="tu@email.com")
       
       .form-group
         label(for="password") Contraseña:
-        input#password(type="password" name="password" required aria-required="true" placeholder="••••••••")
+        input#password(type="password" name="password" required placeholder="••••••••")
       
       .form-actions
         button(type="submit") Iniciar sesión

@@ -1,15 +1,9 @@
-/**
- * Authentication routes
- * @module routes/authRoutes
- */
-
+// src/routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { validateBody } = require('../middleware/validationMiddleware');
-const { userSchemas } = require('../utils/validationSchemas');
 
-router.post('/login', validateBody(userSchemas.login), authController.login);
+router.post('/login', authController.login);
 router.post('/refresh-token', authController.refreshToken);
 router.get('/logout', authController.logout);
 

@@ -840,17 +840,7 @@ input[aria-invalid="true"] {
   100% { transform: rotate(360deg); }
 }
 
-/* Lazy loading animation */
-.book-cover {
-  opacity: 0.4;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
 
-.book-cover.fade-in {
-  opacity: 1;
-  transform: translateY(0);
-}
 
 /* Responsive design */
 @media (max-width: 768px) {

@@ -69,7 +69,7 @@ block content
       }
     });
     
-    // Add book cover placeholders with sophisticated styling and lazy loading
+    // Add book cover placeholders with sophisticated styling
     document.querySelectorAll('.book-cover').forEach((cover, index) => {
       // Generate a warm color palette for book covers
       const colors = [
@@ -95,21 +95,6 @@ block content
       const pattern = document.createElement('div');
       pattern.className = 'cover-pattern';
       cover.appendChild(pattern);
-      
-      // Implement lazy loading with Intersection Observer
-      const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            // Add animation class when the cover becomes visible
-            entry.target.classList.add('fade-in');
-            // Unobserve after animation is triggered
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      
-      // Observe the cover element
-      observer.observe(cover);
     });
 
     const socket = io();

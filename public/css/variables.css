@@ -1,6 +1,6 @@
 /* Centralized color palette and variables for El Lector Voraz */
 :root {
-  /* Color Palette */
+  /* Color Palette - Light Theme (default) */
   --primary: #626d71;
   --primary-dark: #4e585b;
   --secondary: #b38867;
@@ -13,12 +13,38 @@
   --error: #C43B3B;
   --warning: #ddbc95;
   --highlight: #cdcdc0;
+  --shadow-color: rgba(98,109,113,0.1);
+  --header-text: #ffffff;
+  --footer-bg: var(--primary);
+  --footer-text: var(--highlight);
+  --border-color: rgba(0,0,0,0.08);
   
   /* Common measurements */
   --border-radius: 8px;
-  --shadow: 0 2px 8px rgba(98,109,113,0.1);
+  --shadow: 0 2px 8px var(--shadow-color);
   
   /* Standard gradients */
   --primary-gradient: linear-gradient(to right, var(--primary), var(--primary-dark));
   --accent-gradient: linear-gradient(to right, var(--primary), var(--secondary), var(--accent));
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --primary: #4e585b;
+  --primary-dark: #3a4245;
+  --secondary: #b38867;
+  --accent: #ddbc95;
+  --text: #e0e0e0;
+  --text-light: #ddbc95;
+  --background: #1e2022;
+  --card-bg: #2d3235;
+  --success: #5a9164;
+  --error: #d35555;
+  --warning: #e6c89c;
+  --highlight: #4e585b;
+  --shadow-color: rgba(0,0,0,0.3);
+  --header-text: #f0f0f0;
+  --footer-bg: #2d3235;
+  --footer-text: #ddbc95;
+  --border-color: rgba(255,255,255,0.1);
 }

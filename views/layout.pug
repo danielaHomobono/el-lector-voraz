@@ -6,10 +6,22 @@ html(lang="es")
     meta(name="description", content="El Lector Voraz - Librería y cafetería")
     title El Lector Voraz
     link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:wght@300;400;500;600&display=swap")
-    link(rel="stylesheet", href="/css/variables.css")
-    link(rel="stylesheet", href="/styles.css")
-    link(rel="stylesheet", href="/css/common.css")
+    if isProd
+      link(rel="stylesheet", href="/dist/variables.min.css")
+      link(rel="stylesheet", href="/dist/styles.min.css")
+      link(rel="stylesheet", href="/dist/common.min.css")
+      link(rel="stylesheet", href="/dist/theme-switcher.min.css")
+      link(rel="stylesheet", href="/dist/animations.min.css")
+    else
+      link(rel="stylesheet", href="/css/variables.css")
+      link(rel="stylesheet", href="/styles.css")
+      link(rel="stylesheet", href="/css/common.css")
+      link(rel="stylesheet", href="/css/theme-switcher.css")
+      link(rel="stylesheet", href="/css/animations.css")
+    script(src="/js/utility.js", defer)
+    script(src="/js/animations.js", defer)
     script(src="/js/main.js", defer)
+    script(src="/js/theme-switcher.js", defer)
     block scripts
   body
     a(href="#main-content", class="skip-link sr-only") Saltar al contenido principal

@@ -2,6 +2,11 @@ extends layout
 
 block scripts
   script(src="/js/validation.js", defer)
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize form validation
+      window.FormValidator.initFormValidation('login-form');
+    });
 
 block content
   .login-container

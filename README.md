@@ -8,14 +8,6 @@ Esta aplicación web permite administrar el inventario, ventas, clientes y repor
 
 ## Características
 
-### Experiencia de Usuario
-- **Tema Claro/Oscuro**: Cambio de tema según preferencia del usuario
-- **Animaciones**: Transiciones suaves y efectos visuales para mejor experiencia
-- **Lazy Loading**: Carga diferida de imágenes para mejor rendimiento
-- **Validación de Formularios**: Validación en tiempo real de entradas de usuario
-- **Diseño Responsivo**: Adaptación a diferentes tamaños de pantalla
-- **Accesibilidad**: Implementación de atributos ARIA y buenas prácticas
-
 ### Gestión de Productos
 - **Gestión de inventario de libros**: Agregar, editar, eliminar y buscar libros por título, autor o ISBN
 - **Gestión de productos de cafetería**: Administrar bebidas con stock y precios
@@ -61,13 +53,10 @@ Esta aplicación web permite administrar el inventario, ventas, clientes y repor
 ### Características Técnicas
 - **API RESTful**: Endpoints completos para todas las funcionalidades
 - **Seguridad API**: Autenticación con API Key para endpoints protegidos
-- **Validación de datos**: Validación completa de formularios y datos (cliente y servidor)
-- **Manejo de errores**: Sistema robusto de manejo de errores con feedback visual
+- **Validación de datos**: Validación completa de formularios y datos
+- **Manejo de errores**: Sistema robusto de manejo de errores
 - **Interfaz responsiva**: Diseño adaptativo para móviles y desktop
 - **Accesibilidad**: Implementación de estándares de accesibilidad web
-- **Optimización de rendimiento**: Minificación de CSS, lazy loading de imágenes
-- **Documentación de código**: Comentarios JSDoc en funciones clave
-- **Guía de estilos**: Sistema de diseño coherente con variables CSS
 
 ## Requisitos
 
@@ -93,31 +82,17 @@ npm install
 - `PORT`: Puerto en el que se ejecutará el servidor (por defecto: 3000)
 - `API_KEY`: Clave de API para acceder a los endpoints protegidos (ejemplo: "el-voraz-2025")
 - `JWT_SECRET`: Clave secreta para JWT (opcional)
-- `MONGODB_URI`: URI de conexión a MongoDB (opcional)
-```
-
-4. Construir archivos para producción (opcional):
-```bash
-npm run build
 ```
 
 ## Uso
 
-1. Iniciar el servidor en modo desarrollo:
+1. Iniciar el servidor:
 ```bash
-npm run dev
+npm start
 ```
 
-2. Iniciar el servidor en modo producción:
-```bash
-npm run build:prod
-```
-
-3. Acceder a la aplicación:
+2. Acceder a la aplicación:
 - Abrir el navegador en `http://localhost:3000`
-
-4. Cambiar entre tema claro y oscuro:
-- Usar el botón de cambio de tema en la barra de navegación
 
 ## Credenciales de Prueba
 
@@ -265,30 +240,12 @@ npm run build:prod
 - **Pug** - Motor de plantillas
 - **bcryptjs** - Encriptación de contraseñas
 - **JWT** - Autenticación por tokens
-- **Mongoose** - ODM para MongoDB
 
 ### Frontend
 - **Vanilla JavaScript** - Funcionalidad del cliente
 - **CSS3** - Estilos y diseño responsivo
 - **Chart.js** - Gráficos para reportes
 - **Socket.IO Client** - Cliente para comunicación en tiempo real
-- **Intersection Observer API** - Lazy loading de imágenes
-
-## Guía de Estilos
-
-El proyecto utiliza una guía de estilos centralizada para mantener la coherencia visual en toda la aplicación. Para más detalles, consulta [STYLE_GUIDE.md](STYLE_GUIDE.md).
-
-### Características de Diseño
-- **Tema Claro/Oscuro** - Soporte para cambio de tema
-- **Diseño Responsivo** - Adaptable a dispositivos móviles y desktop
-- **Animaciones Sutiles** - Mejoran la experiencia de usuario
-- **Accesibilidad** - Implementación de ARIA y buenas prácticas
-
-### Estructura CSS
-- **variables.css** - Variables CSS centralizadas
-- **styles.css** - Estilos globales
-- **common.css** - Componentes compartidos
-- **[page].css** - Estilos específicos por página
 
 ### Base de Datos
 - **JSON Files** - Almacenamiento de datos (configurable)

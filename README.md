@@ -68,6 +68,7 @@ Esta aplicación web permite administrar el inventario, ventas, clientes y repor
 - **Optimización de rendimiento**: Minificación de CSS, lazy loading de imágenes
 - **Documentación de código**: Comentarios JSDoc en funciones clave
 - **Guía de estilos**: Sistema de diseño coherente con variables CSS
+- **Pruebas automatizadas**: Tests unitarios e integración con Jest y Supertest
 
 ## Requisitos
 
@@ -118,6 +119,29 @@ npm run build:prod
 
 4. Cambiar entre tema claro y oscuro:
 - Usar el botón de cambio de tema en la barra de navegación
+
+## Pruebas
+
+1. Ejecutar todas las pruebas:
+```bash
+npm test
+```
+
+2. Ejecutar pruebas en modo observador (para desarrollo):
+```bash
+npm run test:watch
+```
+
+3. Ejecutar pruebas con cobertura:
+```bash
+npm run test:coverage
+```
+
+### Estructura de pruebas
+
+- `__tests__/unit/`: Pruebas unitarias para funciones y utilidades
+- `__tests__/integration/`: Pruebas de integración para rutas y controladores
+- `__tests__/mocks/`: Datos de prueba y mocks
 
 ## Credenciales de Prueba
 

@@ -192,13 +192,8 @@ npm start
 
 ## Estructura de archivos relevante
 
-### Datos
-- `src/data/products.json` — Base de datos de libros (JSON)
-- `src/data/cafe_products.json` — Base de datos de productos de cafetería
-- `src/data/sales.json` — Historial de ventas
-- `src/data/users.json` — Usuarios del sistema
-- `src/data/clients.json` — Base de datos de clientes
-- `src/data/posts.json` — Contenido de marketing
+### Base de Datos
+- **MongoDB** - Base de datos principal con Mongoose ODM
 
 ### Vistas
 - `views/products.pug` — Catálogo de libros y formulario de alta
@@ -240,6 +235,7 @@ npm start
 - **Pug** - Motor de plantillas
 - **bcryptjs** - Encriptación de contraseñas
 - **JWT** - Autenticación por tokens
+- **Mongoose** - ODM para MongoDB
 
 ### Frontend
 - **Vanilla JavaScript** - Funcionalidad del cliente
@@ -248,17 +244,35 @@ npm start
 - **Socket.IO Client** - Cliente para comunicación en tiempo real
 
 ### Base de Datos
-- **JSON Files** - Almacenamiento de datos (configurable)
-- **MongoDB** - Base de datos opcional (modelos preparados)
+- **MongoDB** - Base de datos principal con Mongoose ODM
+
+## Testing
+
+El proyecto incluye una suite completa de tests:
+
+- **Tests unitarios**: Para middleware, utilidades y servicios
+- **Tests de integración**: Para rutas de autenticación
+- **Configuración Jest**: Optimizada para el proyecto
+
+Para ejecutar los tests:
+```bash
+npm test
+```
+
+Para ver la cobertura:
+```bash
+npm run test:coverage
+```
 
 ## Notas Importantes
 
 - El sistema de sesiones mantiene la autenticación de usuarios en la web
 - Los formularios de alta solo son visibles para usuarios con permisos apropiados
-- Los cambios hechos desde la web y desde la API se reflejan en los mismos archivos JSON
+- Todos los datos se almacenan en MongoDB con Mongoose ODM
 - El chat de soporte funciona en tiempo real con Socket.IO
 - El sistema es completamente responsivo y accesible
 - Todos los endpoints están protegidos según el rol del usuario
+- El proyecto incluye tests automatizados para garantizar la calidad del código
 
 ## Licencia
 

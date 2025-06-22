@@ -32,7 +32,23 @@ async function createSale(saleData) {
 }
 
 async function updateSale(id, saleData) {
-  // ... (puedes adaptar si lo necesitas)
+  // Permitir actualizar los campos principales de la venta
+  const update = {};
+  if (saleData.totalPrice) update.total = saleData.totalPrice;
+  if (saleData.channel) update.channel = saleData.channel;
+  if (saleData.clientId) update.clientId = saleData.clientId;
+  if (saleData.status) update.status = saleData.status;
+  if (saleData.products && Array.isArray(saleData.products)) {
+    update.items = saleData.products.map(item => ({
+      productId: item.productId || item.isbn,
+      type: item.type || 'book',
+      quantity: item.quantity,
+      price: item.price
+    }));
+  }
+  const updated = await Sale.findByIdAndUpdate(id, update, { new: true });
+  if (!updated) throw new Error('Venta no encontrada');
+  return updated;
 }
 
 async function deleteSale(id) {

@@ -1,48 +1,38 @@
 // src/services/marketingService.js
-  const fileService = require('./fileService');
-  const { generateUUID } = require('../utils/uuid');
+const Post = require('../models/Post');
 
-  async function getPosts() {
-    return await fileService.readFile('src/data/posts.json');
-  }
+async function getPosts() {
+  return await Post.find().sort({ createdAt: -1 });
+}
 
-  async function createPost(postData) {
-    const posts = await getPosts();
-    const newPost = {
-      id: generateUUID(),
+async function createPost(postData) {
+  const newPost = new Post({
+    title: postData.title,
+    content: postData.content,
+    author: postData.author || undefined, // Si tienes autenticación, pásala aquí
+    isPublished: postData.isPublished !== undefined ? postData.isPublished : true
+  });
+  await newPost.save();
+  return newPost;
+}
+
+async function updatePost(id, postData) {
+  const updated = await Post.findByIdAndUpdate(
+    id,
+    {
       title: postData.title,
       content: postData.content,
-      date: new Date().toISOString()
-    };
-    posts.push(newPost);
-    await fileService.writeFile('src/data/posts.json', posts);
-    return newPost;
-  }
+      isPublished: postData.isPublished !== undefined ? postData.isPublished : true
+    },
+    { new: true }
+  );
+  if (!updated) throw new Error('Post no encontrado');
+  return updated;
+}
 
-  async function updatePost(id, postData) {
-    const posts = await getPosts();
-    const index = posts.findIndex(p => p.id === id);
-    if (index === -1) {
-      throw new Error('Post no encontrado');
-    }
-    posts[index] = {
-      id,
-      title: postData.title,
-      content: postData.content,
-      date: posts[index].date
-    };
-    await fileService.writeFile('src/data/posts.json', posts);
-    return posts[index];
-  }
+async function deletePost(id) {
+  const deleted = await Post.findByIdAndDelete(id);
+  if (!deleted) throw new Error('Post no encontrado');
+}
 
-  async function deletePost(id) {
-    const posts = await getPosts();
-    const index = posts.findIndex(p => p.id === id);
-    if (index === -1) {
-      throw new Error('Post no encontrado');
-    }
-    posts.splice(index, 1);
-    await fileService.writeFile('src/data/posts.json', posts);
-  }
-
-  module.exports = { getPosts, createPost, updatePost, deletePost };
+module.exports = { getPosts, createPost, updatePost, deletePost };

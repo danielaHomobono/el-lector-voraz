@@ -29,31 +29,13 @@ router.get('/:id', authMiddleware.verifyApiKey, async (req, res) => {
 router.put('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { productId, quantity, totalPrice, type = 'book', channel = 'online', clientId } = req.body;
-    if (!productId || !quantity || !totalPrice) {
+    const saleData = req.body;
+    if (!saleData.productId || !saleData.quantity || !saleData.totalPrice) {
       return res.status(400).json({ error: 'Faltan campos requeridos: productId, quantity, totalPrice' });
     }
-    const sales = await fileService.readFile('src/data/sales.json');
-    const saleIndex = sales.findIndex(sale => sale.id === id);
-    if (saleIndex === -1) {
-      return res.status(404).json({ error: 'Venta no encontrada' });
-    }
-    sales[saleIndex] = {
-      id,
-      total: totalPrice,
-      channel,
-      date: sales[saleIndex].date, // Mantener la fecha original
-      clientId: clientId || null,
-      items: [
-        {
-          productId,
-          type,
-          quantity
-        }
-      ]
-    };
-    await fileService.writeFile('src/data/sales.json', sales);
-    res.json(sales[saleIndex]);
+    // Usar el servicio para actualizar la venta en MongoDB
+    const updatedSale = await saleController.updateSale(req, res);
+    // El controlador ya maneja la respuesta
   } catch (error) {
     console.error('Error en PUT /api/ventas/:id:', error);
     handleError(res, error, 500);
@@ -63,15 +45,8 @@ router.put('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, 
 // DELETE: Eliminar una venta (requiere API key y admin)
 router.delete('/:id', authMiddleware.verifyApiKey, authMiddleware.restrictToAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
-    const sales = await fileService.readFile('src/data/sales.json');
-    const saleIndex = sales.findIndex(sale => sale.id === id);
-    if (saleIndex === -1) {
-      return res.status(404).json({ error: 'Venta no encontrada' });
-    }
-    const deletedSale = sales.splice(saleIndex, 1)[0];
-    await fileService.writeFile('src/data/sales.json', sales);
-    res.json(deletedSale);
+    await saleController.deleteSale(req, res);
+    // El controlador ya maneja la respuesta
   } catch (error) {
     console.error('Error en DELETE /api/ventas/:id:', error);
     handleError(res, error, 500);

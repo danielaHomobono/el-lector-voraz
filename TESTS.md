@@ -1,4 +1,4 @@
-# Instrucciones para los tests 🧪
+# Instrucciones para los tests 
 
 Este proyecto utiliza **Jest** para realizar pruebas unitarias y de integración.
 
@@ -61,4 +61,3 @@ Este proyecto utiliza **Jest** para realizar pruebas unitarias y de integración
 
 ---
 
-¿Dudas? ¡Pregunta a tu equipo o revisa la documentación de Jest! 

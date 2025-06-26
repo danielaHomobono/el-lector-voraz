@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const clientSchema = new mongoose.Schema({
   id: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   name: {
     type: String,
@@ -14,7 +13,6 @@ const clientSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'El email es obligatorio'],
-    unique: true,
     trim: true,
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Por favor ingrese un email válido']

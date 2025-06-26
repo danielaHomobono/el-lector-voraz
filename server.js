@@ -35,7 +35,7 @@ connectDB();
 app.set('view engine', 'pug');
 const viewsPath = path.join(__dirname, 'views');
 app.set('views', viewsPath);
-console.log('Directorio de vistas configurado:', viewsPath);
+
 
 // Middleware
 app.use(express.json());
@@ -64,7 +64,7 @@ app.use((req, res, next) => {
 // Servir archivos estáticos
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
-console.log('Archivos estáticos servidos desde:', publicPath);
+
 
 // --- SOCKET.IO CHAT SOPORTE ---
 // Mapear sockets por usuario y tipo
@@ -569,7 +569,7 @@ app.use((req, res) => {
   res.status(404).send('Cannot GET');
 });
 
-console.log('API_KEY en backend:', process.env.API_KEY);
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
